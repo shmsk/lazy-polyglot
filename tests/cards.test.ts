@@ -93,7 +93,7 @@ describe("answers", () => {
 describe("status", () => {
   test("counts due, known, learning and placement left; reports the pause", () => {
     const state: State = markKnown({ time: { exposures: 2, lastSeen: EARLIER, step: 1, due: EARLIER } }, "house", NOW);
-    expect(cardStatus(WORDS, state, { ...CONFIG, enabled: false }, NOW)).toEqual({ lang: "it", native: "ru", paused: true, due: 1, known: 1, learning: 1, placementLeft: 3, total: 5, statusLine: null, progress: "▓░░░░ 1/5" });
+    expect(cardStatus(WORDS, state, { ...CONFIG, enabled: false }, NOW)).toEqual({ lang: "it", native: "ru", paused: true, due: 1, known: 1, learning: 1, placementLeft: 3, total: 5, statusLine: null, progress: "▓░░░░ 1/5", words: [{ target: "tempo", gloss: "время" }] });
   });
 });
 

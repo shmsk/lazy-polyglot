@@ -1,5 +1,5 @@
 ---
-description: Show how many Lazy Polyglot cards are due in the Claude Code status line (on, off, status)
+description: Show a word you are learning and your learned count under the Claude Code prompt (on, off, status)
 argument-hint: "[on|off|status]"
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/cli.sh *)
 ---

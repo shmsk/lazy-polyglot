@@ -44,7 +44,7 @@ Terminalda, Desktop ilovasining Code boʻlimida, VS Code'da va mobil ilovada ish
 
 **Ikkita kichik ixtiyoriy imkoniyat:**
 
-- `/lazy-polyglot:cards-status on` pastdagi holat qatorida nechta kartochka kutayotganini va keyingi marragacha qancha qolganini (`▓▓▓░░ 87/100`) koʻrsatadi.
+- `/lazy-polyglot:cards-status on` kiritish maydoni ostidagi maslahat qatori oxirida oʻrganilayotgan bitta soʻzni va nechta soʻz oʻrganilganini xira koʻrsatadi, har xabarda yangi soʻz: `? for shortcuts  ·  fiore = gul  ·  5 of 451 learned`.
 - `/lazy-polyglot:spinner on` Claude oʻylayotganda oʻrganayotgan soʻzlaringizni koʻrsatadi. [Batafsil](#spinner-maslahatlari-ixtiyoriy).
 
 ## Bu agentimning javoblarini yomonlashtiradimi?
@@ -330,7 +330,7 @@ Oʻzingiznikini qoʻshish mumkin — qarang: [CONTRIBUTING.md](.github/CONTRIBUT
 | `import <fayl> [--config]` | eksportni shu kompyuterdagi natijaga qoʻshish, ikki tomonning eng yaxshisini qoldirib; `--config` uning sozlamalarini ham oladi |
 | `reading <off\|native\|ipa\|status>` | yangi fransuzcha, inglizcha va portugalcha soʻzlarning talaffuzi: sizning harflaringizda (standart), IPA'da yoki umuman yoʻq |
 | `spinner <on\|off\|status>` | ixtiyoriy: oʻrganayotgan soʻzlaringiz Claude Code spinner maslahatlarida |
-| `cards-status <on\|off\|status>` | ixtiyoriy: takrorlashni kutayotgan kartochkalar soni Claude Code holat qatorida (`/cards` bir marta soʻraydi) |
+| `cards-status <on\|off\|status>` | ixtiyoriy: oʻrganilayotgan soʻz va oʻrganilganlar soni, kiritish maydoni ostida (`/cards` bir marta soʻraydi) |
 | `milestones <on\|off\|status>` | 50, 100, 200… oʻzlashtirilgan soʻzda va mavzu yarmida qisqa qator, kuniga koʻpi bilan bitta (standart holatda yoqilgan) |
 | `instruction` | toʻqish koʻrsatmasini chop etadi (duchor boʻlishlarni belgilamasdan) |
 | `hook` | CLI-hook rejimi: javobdan oldin koʻrsatma tuzadi va soʻrovingizni yodga tushirishlar uchun skanerlaydi; undan keyin (`Stop` yuki) javob ishlatgan soʻzlarni hisoblaydi. Har qanday xatoda 0 bilan chiqadi, shuning uchun xost sessiyasini hech qachon buzmaydi |

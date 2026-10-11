@@ -6,6 +6,19 @@ What changed in each version, written for people who use Lazy Polyglot. The form
 after an update. If an update ever needs you to do something, its section starts with
 **Upgrade notes**: numbered steps.
 
+## [Unreleased]
+
+### Changed
+- `cards-status on` no longer shows a due-card count in the status line, which Claude Code drew
+  as a yellow warning row (`⚠ lazy-polyglot: …`). It now shows one word you are learning and how
+  many you have learned, dim at the end of the hint line under the prompt, a new word each
+  message: `? for shortcuts  ·  fiore = flower  ·  5 of 451 learned`.
+
+### Fixed
+- Hermes Agent: a turn that arrives without a session id now counts under its own process instead
+  of a slot shared by every id-less session, so two such sessions running at once no longer
+  score words against each other's replies.
+
 ## [0.9.15] - 2026-10-09
 
 ### Added
@@ -13,7 +26,7 @@ after an update. If an update ever needs you to do something, its section starts
   ends its next reply with one short line in the language you're learning. Half a topic, a whole
   topic and a week with new words get a line too. At most one a day, no streaks, and milestones
   you passed before updating aren't replayed. `status` shows the way to the next one
-  (`▓▓▓░░ 87/100`), and so does the status line if you turned on `cards-status`.
+  (`▓▓▓░░ 87/100`).
   `/lazy-polyglot:milestones off` turns them off.
 
 ### Changed

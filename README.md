@@ -41,7 +41,7 @@ It works in the terminal, the Desktop app's Code tab, VS Code and the mobile app
 
 **Two small opt-ins:**
 
-- `/lazy-polyglot:cards-status on` shows how many cards are due in the status line at the bottom, and the way to your next milestone (`▓▓▓░░ 87/100`).
+- `/lazy-polyglot:cards-status on` shows a word you are learning and how many you have learned, dim at the end of the hint line under the prompt, a new word each message: `? for shortcuts  ·  fiore = flower  ·  5 of 451 learned`.
 - `/lazy-polyglot:spinner on` shows words you're learning while Claude is thinking. [Details](#spinner-tips-opt-in).
 
 ## Will it make my agent's answers worse?
@@ -325,7 +325,7 @@ Adding yours is welcome — see [CONTRIBUTING.md](.github/CONTRIBUTING.md). The 
 | `import <file> [--config]` | merge an export into this machine's progress, keeping the best of both; `--config` also takes its settings |
 | `reading <off\|native\|ipa\|status>` | pronunciation of new French, English and Portuguese words: in your letters (default), IPA, or none |
 | `spinner <on\|off\|status>` | opt-in: words you are learning in the Claude Code spinner tips |
-| `cards-status <on\|off\|status>` | opt-in: how many cards are due, in the Claude Code status line (`/cards` asks once) |
+| `cards-status <on\|off\|status>` | opt-in: a learning word and the learned count, dim under the prompt (`/cards` asks once) |
 | `milestones <on\|off\|status>` | a short line at 50, 100, 200… absorbed words and topic halves, at most one a day (on by default) |
 | `instruction` | print the weave instruction (without marking exposures) |
 | `hook` | CLI-hook mode: before a reply, builds the instruction and scans your prompt for recalls; after it (a `Stop` payload), counts the words the reply used. Exits 0 on any error so it never breaks the host session |

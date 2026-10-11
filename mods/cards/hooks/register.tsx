@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Card, CardResult, CardStatus, CardsView } from '../types'
+import type { Card, CardResult, CardStatus, CardsView, HintLine } from '../types'
 import { cardLangs, langTag } from './lang'
 import { cardSvg, doneSvg } from './svg'
 
@@ -10,6 +10,8 @@ import { cardSvg, doneSvg } from './svg'
 const PANE = 'lazy-polyglot-cards'
 const ROUND = 10
 const view = atom({ plugin: 'lazy-polyglot', key: 'view' } as const, { phase: 'loading' } as CardsView)
+// a word being learned and the learned count, dim at the end of the hint line under the prompt; null draws nothing
+const hint = atom({ plugin: 'lazy-polyglot', key: 'hint' } as const, null as HintLine | null)
 
 type Engine = EngineInterface
 
@@ -56,10 +58,24 @@ async function cards($: Engine, args: string[]): Promise<unknown> {
 const message = (err: unknown) => (err instanceof Error ? err.message : String(err))
 
 async function showStatus($: Engine, status: CardStatus) {
-  // opt-in: the status line is the user's space, nothing shows there until they say yes
-  const parts = [status.due > 0 ? `🃏 ${status.due} due` : '', status.progress ?? ''].filter(Boolean)
-  $.ui.status(status.statusLine !== true || status.paused || parts.length === 0 ? undefined : parts.join(' · '))
+  // opt-in: the space under the prompt is the user's, nothing shows there until they say yes.
+  // Not $.ui.status: the terminal draws that as a yellow warning row.
+  const show = status.statusLine === true && !status.paused && ((status.words?.length ?? 0) > 0 || status.known > 0)
+  await update($, hint, (prev): HintLine | null => (show ? { words: status.words ?? [], known: status.known, total: status.total, index: prev?.index ?? 0 } : null))
 }
+
+/** `cucina = кухня  ·  5 of 451 learned`: the word at `index`, round and round. */
+export function hintText(h: HintLine): string {
+  const w = h.words.length > 0 ? h.words[h.index % h.words.length]! : undefined
+  const word = w && `${w.target}${w.reading ? ` [${w.reading}]` : ''} = ${w.gloss}`
+  return [word, `${h.known} of ${h.total} learned`].filter(Boolean).join('  ·  ')
+}
+
+const refresh = ($: Engine) =>
+  void cards($, ['status']).then(
+    status => showStatus($, status as CardStatus),
+    () => undefined, // Lazy Polyglot missing or broken: /cards says why when opened
+  )
 
 async function start($: Engine) {
   await update($, view, (): CardsView => ({ phase: 'loading' }))
@@ -132,7 +148,7 @@ async function grade($: Engine, ok: boolean) {
   await record($, ['grade', card.id, card.kind, card.dir, ok ? 'ok' : 'fail'])
 }
 
-/** The once-only question on the done screen: show the due count in the status line? */
+/** The once-only question on the done screen: show a learning word under the prompt? */
 async function chooseStatusLine($: Engine, show: boolean) {
   try {
     const cli = await findCli($)
@@ -160,11 +176,25 @@ const ask = (card: Card, lang: string) =>
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'cards', description: 'Review Lazy Polyglot words as flashcards (due words first, then placement)' })
-    void cards($, ['status']).then(
-      status => showStatus($, status as CardStatus),
-      () => undefined, // Lazy Polyglot missing or broken: /cards says why when opened
-    )
+    refresh($)
     return next(e)
+  })
+
+  // a new word each message; the list itself follows what the replies wove
+  on('prompt.submit', async ($, e, next) => {
+    await update($, hint, (h): HintLine | null => (h ? { ...h, index: h.index + 1 } : h))
+    return next(e)
+  })
+
+  on('turn.complete', async ($, e, next) => {
+    refresh($)
+    return next(e)
+  })
+
+  // the engine keeps its own hint line and draws the tail dim after it: `? for shortcuts  ·  cucina = кухня  ·  5 of 451 learned`
+  on('ui.render', { component: 'PromptHint' }, async ($, e, next) => {
+    const h = await read($, hint)
+    return h ? next({ ...e, props: { ...e.props, tail: `  ·  ${hintText(h)}` } }) : next(e)
   })
 
   on('command.run', { command: 'cards' }, async $ => {
@@ -207,7 +237,7 @@ export const register: Register = on => {
       )
     const statusQuestion = v.phase === 'done' && v.status.statusLine === null && (
       <Box flexDirection="column">
-        <Text>Show how many cards are due in the status line? You can change it later: /lazy-polyglot:cards-status</Text>
+        <Text>Show a word you're learning under the prompt? You can change it later: /lazy-polyglot:cards-status</Text>
         <Box flexDirection="row" gap={1}>
           <Button key="statusYes" onPress={() => void chooseStatusLine($, true)}>Yes, show it</Button>
           <Button key="statusNo" onPress={() => void chooseStatusLine($, false)}>No</Button>
@@ -291,7 +321,7 @@ export const register: Register = on => {
           </Text>
           {v.status.statusLine === null && (
             <Box flexDirection="column">
-              <Text>Show how many cards are due in the status line? You can change it later: /lazy-polyglot:cards-status</Text>
+              <Text>Show a word you're learning under the prompt? You can change it later: /lazy-polyglot:cards-status</Text>
               <Box flexDirection="row" gap={1}>
                 <Button key="statusYes" onPress={() => void chooseStatusLine($, true)}>Yes, show it</Button>
                 <Button key="statusNo" onPress={() => void chooseStatusLine($, false)}>No</Button>

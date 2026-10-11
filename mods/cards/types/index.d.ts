@@ -15,11 +15,16 @@ export type CardStatus = {
   learning: number
   placementLeft: number
   total: number
-  /** The due count in the status line: chosen on/off, or null = never asked (the done screen asks once). */
+  /** A learning word under the prompt: chosen on/off, or null = never asked (the done screen asks once). */
   statusLine?: boolean | null
-  /** The way to the next milestone (`▓▓▓▓░ 87/100`); null when milestones are off, missing from a CLI older than 0.9.15. */
+  /** The way to the next milestone (`▓▓▓▓░ 87/100`), no longer drawn by the mod; null when milestones are off, missing from a CLI older than 0.9.15. */
   progress?: string | null
+  /** Words being learned, most recently woven first; missing from a CLI older than 0.9.16. */
+  words?: { target: string; gloss: string; reading?: string }[]
 }
+
+/** The hint line under the prompt: the learning words, the learned count, and which word shows now. */
+export type HintLine = { words: { target: string; gloss: string; reading?: string }[]; known: number; total: number; index: number }
 
 /** What an answer came to: the right answer is shown after a hit and a miss alike. */
 export type CardResult = { ok: boolean; expected: string; step: number; due: string; known: boolean; undo?: { state: Record<string, unknown>; skipped: string[] } }
@@ -37,6 +42,6 @@ export type CardsView =
 
 declare module 'claude-code' {
   interface PluginState {
-    'lazy-polyglot': { view: CardsView }
+    'lazy-polyglot': { view: CardsView; hint: HintLine | null }
   }
 }

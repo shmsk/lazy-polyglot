@@ -3,9 +3,10 @@ import type { Engine } from 'claude-code/testing'
 import type { On, RenderSurface } from 'claude-code'
 import { cardSvg, esc, fitSize } from '../hooks/svg'
 import { langTag } from '../hooks/lang'
+import { hintText } from '../hooks/register'
 
 // A stand-in for `lazy-polyglot cards ...`: two cards, a forward review and a reverse one.
-const BASE = { lang: 'it', paused: false, due: 2, known: 10, learning: 3, placementLeft: 40, total: 432 }
+const BASE = { lang: 'it', paused: false, due: 2, known: 10, learning: 3, placementLeft: 40, total: 432, words: [{ target: 'casa', gloss: 'дом' }, { target: 'tempo', gloss: 'время', reading: 'темпо' }] }
 const CARDS = [
   { id: 'house', kind: 'review', dir: 'forward', prompt: 'casa' },
   { id: 'time', kind: 'review', dir: 'reverse', prompt: 'время' },
@@ -37,17 +38,25 @@ function fakeCli(on: On, { paused = false, statusLine = null as boolean | null, 
   return calls
 }
 
-const statusLines: unknown[] = []
+const tails: (string | undefined)[] = []
 function surfaceStubs(on: On) {
-  statusLines.length = 0
+  // beneath the plugin, where the engine would draw the line: what tail reached it
+  on('ui.render', { component: 'PromptHint' }, async ($, e) => {
+    tails.push(e.props.tail)
+    const { Text } = $.ui.resolve(e)
+    return <Text dimColor>{e.props.hint}</Text>
+  })
   on('ui.open', async () => ({ value: { isPlaced: true } as const }))
   on('ui.close', async () => ({ value: undefined }))
-  on('ui.status', async (_$, e) => {
-    statusLines.push(e)
-    return { value: undefined }
-  })
 }
-const shownDue = () => statusLines.some((e) => JSON.stringify(e).includes('🃏'))
+// the hint line under the prompt as the mod leaves it: its `tail`, or nothing
+const HINT = { isDraft: false, isWorking: false, hint: '? for shortcuts' } as const
+const hintTail = async ($: Engine) => {
+  tails.length = 0
+  const ui = await $.ui.mount({ plugin: 'lazy-polyglot', surface: 'terminal', component: 'PromptHint', props: HINT })
+  await ui.unmount()
+  return tails.at(-1)
+}
 
 const PROPS = { title: 'Lazy Polyglot cards', isFocused: true, bodyColumns: 60, placement: 'inline', scroll: { offset: 0, bodyRows: 20 }, view: {} } as const
 const mountOn = async <S extends RenderSurface>($: Engine, surface: S) => {
@@ -100,11 +109,11 @@ describe('status line is opt-in', () => {
     await ui.press({ key: 'dontknow' })
     await ui.press({ key: 'next' })
     expect(await ui.find({ text: /Round done/ })).toBeDefined()
-    expect(shownDue()).toBe(false)
-    expect(await ui.find({ text: /Show how many cards are due in the status line/ })).toBeDefined()
+    expect(await hintTail($)).toBeUndefined()
+    expect(await ui.find({ text: /Show a word you're learning under the prompt/ })).toBeDefined()
     await ui.press({ key: 'statusYes' })
     expect(calls).toContainEqual(['cards-status', 'on'])
-    expect(shownDue()).toBe(true)
+    expect(await hintTail($)).toBe('  ·  casa = дом  ·  10 of 432 learned')
     expect(await ui.find({ key: 'statusYes' })).toBeUndefined()
   })
 
@@ -117,13 +126,13 @@ describe('status line is opt-in', () => {
     }
     expect(await ui.find({ text: /Round done/ })).toBeDefined()
     expect(await ui.find({ key: 'statusYes' })).toBeUndefined()
-    expect(shownDue()).toBe(false)
+    expect(await hintTail($)).toBeUndefined()
   })
 
   test('chosen on: the count shows', async ($, on) => {
     fakeCli(on, { statusLine: true })
     await mountOn($, 'terminal')
-    expect(shownDue()).toBe(true)
+    expect(await hintTail($)).toBe('  ·  casa = дом  ·  10 of 432 learned')
   })
 })
 
@@ -258,4 +267,12 @@ describe('each word shows its language: flag and name', () => {
     expect(cardSvg({ ...face, promptLang: 'it' })).toContain('🇮🇹 ITALIANO')
     expect(cardSvg(face)).toContain('>IT<')
   })
+})
+
+test('the hint line: a new word each message, round and round; the count alone when no word is in progress', () => {
+  const h = { words: [{ target: 'casa', gloss: 'дом' }, { target: 'tempo', gloss: 'время', reading: 'темпо' }], known: 5, total: 451, index: 0 }
+  expect(hintText(h)).toBe('casa = дом  ·  5 of 451 learned')
+  expect(hintText({ ...h, index: 1 })).toBe('tempo [темпо] = время  ·  5 of 451 learned')
+  expect(hintText({ ...h, index: 2 })).toBe('casa = дом  ·  5 of 451 learned')
+  expect(hintText({ ...h, words: [] })).toBe('5 of 451 learned')
 })

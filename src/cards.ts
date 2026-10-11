@@ -6,6 +6,7 @@ import { answerPlacement, placementQueue, skippedFor } from "./placement.ts";
 import { readingFor, readingOf } from "./reading.ts";
 import { absorbedCount, milestoneBar } from "./milestones.ts";
 import { isTopicOnly } from "./topics.ts";
+import { pickSpinnerWords } from "./spinner.ts";
 
 /**
  * Flashcards: the review half of the ladder, driven by the learner instead of by replies.
@@ -163,13 +164,19 @@ export interface CardStatus {
   learning: number;
   placementLeft: number;
   total: number;
-  /** Show the due count in the status line: true/false as chosen, null = never asked. */
+  /** Show a learning word under the prompt: true/false as chosen, null = never asked. */
   statusLine: boolean | null;
   /** The way to the next milestone (`▓▓▓▓░ 87/100`), null when milestones are off or all are behind. */
   progress: string | null;
+  /** Words being learned, most recently woven first: the mod shows one under the prompt, a new one each message. */
+  words: { target: string; gloss: string; reading?: string }[];
 }
 
+/** How many learning words a status carries for the hint line to rotate through. */
+export const HINT_WORDS = 10;
+
 export function cardStatus(words: Word[], state: State, config: Config, now: string): CardStatus {
+  const mode = readingOf(config, config.lang, words.some((w) => w.ipa));
   const known = words.filter((w) => isAbsorbed(state[w.id])).length;
   const started = words.filter((w) => {
     const s = state[w.id];
@@ -186,5 +193,9 @@ export function cardStatus(words: Word[], state: State, config: Config, now: str
     total: words.length,
     statusLine: config.cardsStatus ?? null,
     progress: config.milestones === false ? null : milestoneBar(absorbedCount(state), words.filter((w) => !isTopicOnly(w)).length),
+    words: pickSpinnerWords(words, state, HINT_WORDS).map((w) => {
+      const reading = readingFor(w, mode, config.native, config.lang);
+      return { target: w.target, gloss: glossFor(w, config.native), ...(reading ? { reading } : {}) };
+    }),
   };
 }
