@@ -185,6 +185,16 @@ interface HookPayload {
 }
 
 /**
+ * A Claude Code run with nobody reading it: `claude --print` (or a non-TTY stdout) and the
+ * Agent SDK set CLAUDE_CODE_ENTRYPOINT to sdk-cli / sdk-ts / sdk-py. Such runs never serve
+ * or count words, or a background job would burn the deck. LAZY_POLYGLOT_HEADLESS=1 opts back in.
+ */
+function isHeadless(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env.LAZY_POLYGLOT_HEADLESS === "1") return false;
+  return ["sdk-cli", "sdk-ts", "sdk-py"].includes(env.CLAUDE_CODE_ENTRYPOINT ?? "");
+}
+
+/**
  * Read the hook payload from stdin without ever hanging:
  * TTY (manual run) → skip; open-but-silent pipe → 100ms timeout wins.
  */
@@ -446,6 +456,8 @@ try {
         else if (!silent) console.log(text);
         process.exit(0);
       };
+      // nobody reads a headless Claude Code reply: no words, no recalls, no misses, no writes
+      if (!gemini && !antigravity && isHeadless()) process.exit(0);
       let payload: HookPayload = { prompt: "", sessionId: "", eventName: "" };
       try {
         payload = await readHookPayload();

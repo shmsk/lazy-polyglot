@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
@@ -167,6 +167,35 @@ describe("honest counting", () => {
     expect(later?.nudge).toBe(false);
   });
 
+  test("a whole deck resting after misses still serves words, seen longest ago first", () => {
+    const now = iso(T0);
+    const rest = iso(T0 + 5 * DAY);
+    const state: State = Object.fromEntries(
+      words.map((w, i) => [w.id, { exposures: 1, lastSeen: iso(T0 - (i + 1) * HOUR), step: 0, due: rest, missed: 1 }]),
+    );
+    const { picks } = pickLadder(words, state, 4, now);
+    expect(picks.map((p) => p.word.id)).toEqual(["w39", "w38", "w37", "w36"]);
+  });
+
+  test("a fallback word the reply skipped keeps its rest; a woven one counts a showing", () => {
+    const now = iso(T0);
+    const rest = iso(T0 + 5 * DAY);
+    const state: State = {
+      a: { exposures: 1, lastSeen: iso(T0 - DAY), step: 0, due: rest, missed: 1 },
+      b: { exposures: 1, lastSeen: iso(T0 - DAY), step: 0, due: rest, missed: 1 },
+    };
+    markMissed(state, ["a"], now);
+    expect(state.a).toEqual({ exposures: 1, lastSeen: iso(T0 - DAY), step: 0, due: rest, missed: 1 });
+    markWoven(state, ["b"], now);
+    expect(state.b!.exposures).toBe(2);
+    expect(state.b!.due).toBe(rest);
+  });
+
+  test("a word that only waits out its interval is not pulled early", () => {
+    const state: State = { w00: { exposures: 1, lastSeen: iso(T0), step: 1, due: iso(T0 + 8 * HOUR) } };
+    expect(pickLadder([words[0]!], state, 4, iso(T0 + HOUR)).picks).toEqual([]);
+  });
+
   test("settle: woven picks climb, skipped ones are missed, known words only count a showing", () => {
     const state: State = { big: { exposures: 12, lastSeen: iso(T0 - DAY), step: 5, due: iso(T0 + 9 * DAY) } };
     const rec = { lang: "es", at: iso(T0), picks: { house: "casa", time: "tiempo" }, known: { big: "grande" } };
@@ -285,5 +314,46 @@ describe("Stop hook, end to end", () => {
     const stop = run(dir, { session_id: "s", hook_event_name: "Stop", transcript_path: join(dir, "missing.jsonl") });
     expect(stop.status).toBe(0);
     expect(stop.stdout.trim()).toBe("{}");
+  });
+});
+
+describe("headless Claude Code runs", () => {
+  const CLI = join(import.meta.dir, "..", "src", "cli.ts");
+  const run = (dir: string, payload: object, env: Record<string, string>) =>
+    spawnSync("bun", [CLI, "hook"], { env: { ...process.env, LAZY_POLYGLOT_DIR: dir, ...env }, input: JSON.stringify(payload), encoding: "utf8" });
+  const snapshot = (dir: string) =>
+    Object.fromEntries(readdirSync(dir).filter((f) => f !== "t.jsonl").map((f) => [f, readFileSync(join(dir, f), "utf8")]));
+  const setup = () => {
+    const dir = mkdtempSync(join(tmpdir(), "lazy-polyglot-headless-"));
+    writeFileSync(join(dir, "config.json"), JSON.stringify({ lang: "es", native: "en", level: 4, algorithm: 3 }));
+    const transcript = join(dir, "t.jsonl");
+    writeFileSync(transcript, [{ type: "user", message: { content: "status?" } }, { type: "assistant", message: { content: [{ type: "text", text: "All green." }] } }].map((l) => JSON.stringify(l)).join("\n"));
+    return { dir, transcript };
+  };
+
+  for (const entry of ["sdk-cli", "sdk-ts", "sdk-py"]) {
+    test(`${entry}: twelve prompt+reply pairs serve nothing and write nothing`, () => {
+      const { dir, transcript } = setup();
+      const before = snapshot(dir);
+      for (let i = 0; i < NUDGE_GIVE_UP; i++) {
+        const served = run(dir, { prompt: "status?", session_id: `job-${i}`, hook_event_name: "UserPromptSubmit" }, { CLAUDE_CODE_ENTRYPOINT: entry });
+        expect(served.status).toBe(0);
+        expect(served.stdout).toBe("");
+        expect(run(dir, { session_id: `job-${i}`, hook_event_name: "Stop", transcript_path: transcript }, { CLAUDE_CODE_ENTRYPOINT: entry }).status).toBe(0);
+      }
+      expect(snapshot(dir)).toEqual(before);
+    });
+  }
+
+  test("an interactive session (cli) still serves", () => {
+    const { dir } = setup();
+    const served = run(dir, { prompt: "status?", session_id: "s", hook_event_name: "UserPromptSubmit" }, { CLAUDE_CODE_ENTRYPOINT: "cli" });
+    expect(served.stdout).toContain("<lazy-polyglot>");
+  });
+
+  test("LAZY_POLYGLOT_HEADLESS=1 opts a headless run back in", () => {
+    const { dir } = setup();
+    const served = run(dir, { prompt: "status?", session_id: "s", hook_event_name: "UserPromptSubmit" }, { CLAUDE_CODE_ENTRYPOINT: "sdk-cli", LAZY_POLYGLOT_HEADLESS: "1" });
+    expect(served.stdout).toContain("<lazy-polyglot>");
   });
 });

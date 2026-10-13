@@ -79,10 +79,12 @@ export function markWoven(state: State, ids: string[], now: string): State {
  * Served while due and skipped: stays due, one miss closer to the nudge slot.
  * A word missed NUDGE_GIVE_UP times rests for a week instead, so a word models
  * can never fit stops holding a nudge slot; it keeps one miss, so it stays started.
+ * A word that is not due (a resting one served as a fallback) is left alone.
  */
 export function markMissed(state: State, ids: string[], now: string): State {
   for (const id of ids) {
     const prev: WordState = state[id] ?? { exposures: 0, lastSeen: "" };
+    if (started(prev) && !isDue(prev, now)) continue; // a resting word served as a fallback: its rest stays as it was
     const missed = (prev.missed ?? 0) + 1;
     state[id] = missed >= NUDGE_GIVE_UP
       ? { ...prev, step: stepOf(prev), due: at(now, NUDGE_REST_MS), missed: 1 }
@@ -96,6 +98,7 @@ export function markMissed(state: State, ids: string[], now: string): State {
  * - due words first, longest overdue first (they return every turn until woven);
  * - then new words; a quarter of the slots stays open for them, so a backlog of
  *   reviews never stops new learning;
+ * - nothing due and nothing new: the words resting after misses, seen longest ago first, so the plugin never goes quiet;
  * - up to MAX_NUDGE of the picked due words that kept missing are marked nudge;
  * - `known`: a rotating sample of absorbed words that are not due, least recently
  *   seen first, to use freely without a translation.
@@ -123,6 +126,16 @@ export function pickLadder(words: Word[], state: State, n: number, now: string):
   take(due, Math.max(0, n - reserve));
   take(fresh, n);
   take(due, n); // fresh ran dry: give the slots back to reviews
+  // nothing due and nothing new, the deck resting after misses: the words seen longest ago, rather than silence
+  // (a word that only waits out its interval keeps waiting)
+  if (picks.length === 0) {
+    take(
+      words
+        .filter((w) => (state[w.id]?.missed ?? 0) > 0 && stepOf(state[w.id]) < ABSORBED_STEP)
+        .sort((a, b) => (state[a.id]!.lastSeen ?? "").localeCompare(state[b.id]!.lastSeen ?? "")),
+      n,
+    );
+  }
 
   const nudges = new Set(
     picks

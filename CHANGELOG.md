@@ -15,6 +15,14 @@ after an update. If an update ever needs you to do something, its section starts
   message: `? for shortcuts  ·  fiore = flower  ·  5 of 451 learned`.
 
 ### Fixed
+- Claude Code runs that nobody reads (`claude --print`, the Agent SDK, a script or scheduled job)
+  no longer take or score words. Before, every such run served new words and, when the reply
+  skipped them, counted misses; a job running every few minutes could start the whole word list
+  and send every word to rest for a week within days. To weave in those runs anyway, set
+  `LAZY_POLYGLOT_HEADLESS=1`.
+- When every word you've started is resting after misses and none is new, your agent gets the
+  ones you saw longest ago instead of nothing, so the plugin no longer goes quiet. Skipping
+  such a word doesn't lengthen its rest.
 - Hermes Agent: a turn that arrives without a session id now counts under its own process instead
   of a slot shared by every id-less session, so two such sessions running at once no longer
   score words against each other's replies.

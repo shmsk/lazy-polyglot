@@ -19,6 +19,7 @@ If you're already on the latest version, go on to the table.
 | What you see | Usual cause | Fix |
 |---|---|---|
 | No words woven at all | Paused | `/lazy-polyglot:resume` (or `resume`) |
+| No words in `claude --print` or Agent SDK runs | By design: nobody reads those replies, so they never take or score words | To weave there anyway (tests, evals), set `LAZY_POLYGLOT_HEADLESS=1` |
 | No words right after installing | The session started before the install | Restart the session |
 | No words in Codex | The hook isn't trusted yet | Open `/hooks` in Codex and trust the `lazy-polyglot` hook |
 | No words in OpenClaw | The `claude-cli` provider doesn't run prompt hooks | Use another provider ([openclaw#65157](https://github.com/openclaw/openclaw/issues/65157)) |
