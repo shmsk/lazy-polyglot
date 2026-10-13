@@ -81,17 +81,23 @@ export function matchServed(reply: string, served: string[]): string[] {
  * since the learner reads them. Bare bold matches strictly (inflects), so a bold
  * English header never passes for a Spanish word; a glossed pair also matches by
  * looseStem, which counts Italian, Portuguese, French, German and Turkish forms.
+ * `forms` (lemma → irregular forms) counts what shares no root with the lemma: è for
+ * essere, went for to go. English verbs are matched without their leading "to".
  */
-export function wovenLemmas(reply: string, served: string[]): string[] {
+export function wovenLemmas(reply: string, served: string[], forms: Record<string, string[]> = {}): string[] {
   const { prose } = splitCode(reply);
   const spans = boldSpans(prose).map(tokens);
   const bold = spans.flat();
+  const boldSet = new Set(bold);
   // a glossed pair is an explicit weave, so a loose root is safe there: tira, cade, porta
   const glossed = wovenPairs(prose).map((p) => tokens(p.word));
   const glossedHit = (part: string) => glossed.some((toks) => toks.some((t) => t.startsWith(looseStem(part))));
   const hit = (part: string) => bold.some((t) => inflects(t, part)) || glossedHit(part);
   return served.filter((lemma) => {
-    const parts = tokens(lemma);
+    if ((forms[lemma] ?? []).some((f) => boldSet.has(norm(f)))) return true;
+    const all = tokens(lemma);
+    // "to want" is woven as want, wants, wanted: the infinitive marker is never bold
+    const parts = all.length > 1 && all[0] === "to" ? all.slice(1) : all;
     if (parts.length === 0) return false;
     // multi-word lemmas ("por favor"): every part must show up in bold
     if (parts.every(hit)) return true;

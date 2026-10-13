@@ -124,6 +124,21 @@ Only for a language that is not read the way it is spelled (French, English, Por
 - A regional variant gets its own file with only the words that sound different, plus every word it spells differently (`pt-BR`: Brazilian pronunciation; `en-GB`: Received Pronunciation).
 - For yourself, the file goes in `~/.lazy-polyglot/readings/<code>.json`, like the others.
 
+## Step 4e (optional) — `data/irregular/<code>.json`
+
+A reply counts a word only when it shows up in bold, and a verb is matched by its root: `venire` finds *vengo*. Forms that share no root with the infinitive (`essere` → *è*, *sono*; `to go` → *went*) would count as a miss. List them for your language's ~15 most used irregular verbs, keyed by concept id:
+
+```json
+{
+ "to-be": ["è", "sono", "sei", "era", "stato", "fu"],
+ "to-go": ["vado", "vai", "va", "vanno", "andato"]
+}
+```
+
+- Lowercase, accents as written: a bold «e» never passes for «è».
+- Only verbs in your wordlist; `bun test` checks every key.
+- A regional variant inherits its base's file; for yourself, the file goes in `~/.lazy-polyglot/irregular/<code>.json`.
+
 ## Step 5 — Validate
 
 All three must pass; paste their output into your PR description:
@@ -157,7 +172,7 @@ Expect a `<lazy-polyglot>` block containing `word = gloss` pairs in your languag
 
 ## Step 8 — PR checklist
 
-- [ ] Files touched are exactly: `data/wordlists/<code>.json` and optionally `data/grammar/<code>.json`, `data/patterns/<code>.json`, `data/falseFriends/<code>.json`, `data/numbers/<code>.json`, `data/readings/<code>.json`
+- [ ] Files touched are exactly: `data/wordlists/<code>.json` and optionally `data/grammar/<code>.json`, `data/patterns/<code>.json`, `data/falseFriends/<code>.json`, `data/numbers/<code>.json`, `data/readings/<code>.json`, `data/irregular/<code>.json`
 - [ ] Output of all three Step 5 commands pasted
 - [ ] Audit summary: model used, findings applied/rejected
 - [ ] Live smoke test output pasted

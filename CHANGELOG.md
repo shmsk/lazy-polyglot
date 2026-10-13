@@ -13,8 +13,20 @@ after an update. If an update ever needs you to do something, its section starts
   as a yellow warning row (`⚠ lazy-polyglot: …`). It now shows one word you are learning and how
   many you have learned, dim at the end of the hint line under the prompt, a new word each
   message: `? for shortcuts  ·  fiore = flower  ·  5 of 451 learned`.
+- New words now come most frequent first, not in blocks by part of speech (200 nouns, then
+  verbs, with *molto*, *più*, *già* near the end). The order is a rank per word, computed from
+  how often it turns up in film and TV subtitles and in news, across six languages; numerals,
+  weekdays and months still come as sets. In Italian the first hundred new words now cover
+  about a fifth of everyday speech instead of a twenty-fifth. Words you have already started
+  keep their progress; only the ones you haven't met yet are reordered. Sources are credited
+  in the README.
 
 ### Fixed
+- A reply that weaves an irregular verb form now counts: **è** or **sono** for *essere*, *went*
+  for *to go*, *fue* for *ir*. Before, only forms sharing the infinitive's root matched, so these
+  were scored as misses.
+- In English, a woven verb (*want*, *wanted*) now counts for *to want*. Before, the lemma's
+  leading *to* had to be bold too, so no English verb ever counted.
 - Claude Code runs that nobody reads (`claude --print`, the Agent SDK, a script or scheduled job)
   no longer take or score words. Before, every such run served new words and, when the reply
   skipped them, counted misses; a job running every few minutes could start the whole word list

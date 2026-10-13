@@ -198,7 +198,7 @@ flowchart LR
 ```
 
 - **Kontseptga bogʻlangan lugʻat**: maʼnolar `data/concepts.json`da bir marta saqlanadi (id, pos, tier, har bir ona til uchun glosslar); har bir `data/wordlists/<lang>.json` esa yupqa kontsept→lemma xaritasi, shuning uchun yangi til qoʻshish — bitta kichik fayl, va glosslar hech qachon bir-biridan chetlanmaydi
-- **Soʻz roʻyxatlari**: har bir til uchun ~400 ta asosiy mazmun soʻzi (ot/fe'l/sifat/ravish) va 30 ta son, yordamchi soʻzlarsiz; tier maydoni →1000 soʻzlik bosqich uchun joy ajratadi, u yadro ~80% oʻzlashtirilganda ochiladi
+- **Soʻz roʻyxatlari**: har bir til uchun ~400 ta asosiy mazmun soʻzi (ot/fe'l/sifat/ravish) va 30 ta son, yordamchi soʻzlarsiz; mazmunan Swadesh roʻyxatlari kabi asosiy lugʻatlarga yaqin. Yangi soʻzlar eng koʻp ishlatiladiganidan boshlab keladi: tartib subtitrlar va yangiliklardagi chastotadan hisoblangan (manbalar «Soʻz chastotasi: manbalar» boʻlimida); tier maydoni →1000 soʻzlik bosqich uchun joy ajratadi, u yadro ~80% oʻzlashtirilganda ochiladi
 - **Har bir til boʻyicha progress**: holat `~/.lazy-polyglot/state.<lang>.json` faylida, kontsept id boʻyicha saqlanadi — progress lemma tuzatishlaridan omon qoladi va tillar oʻrtasida solishtirish mumkin ("siz *quyosh* soʻzini 5 tildan 3 tasida bilasiz")
 - **Oraliqlar zinasi**: har bir soʻz 30 daqiqadan, 8 soatdan, 1 kundan, 4 kundan, 2 haftadan, 1 oydan, soʻng 6 oydan keyin qaytadi. U zinadan bir pogʻona faqat vaqti kelganda javob uni haqiqatan ishlatsagina koʻtariladi; vaqti kelgan soʻzlar birinchi turadi, har bir roʻyxatning choragi esa yangi soʻzlar uchun boʻsh qoladi
 - **Halol hisob**: javobdan keyin Stop hooki (yoki xostning "javobdan keyin" hodisasi) uni qayta oʻqiydi va faqat javob ishlatgan soʻzlar koʻrsatilgan hisoblanadi. Bunday hodisasi yoʻq xost avvalgidek berilgan soʻzlarni hisoblaydi
@@ -212,7 +212,7 @@ flowchart LR
 
 ## Mavzular: safar yoki imtihon uchun soʻzlar
 
-Asosiy qism eng koʻp ishlatiladigan ~450 soʻzni oʻrgatadi. Mavzu bitta maqsad uchun kerakli soʻzlarni oldinga qoʻyadi: `/lazy-polyglot:topic Barselonadagi restoranlar, 20-noyabrgacha`, «DELE A2 imtihoni uchun mavzu», «Rimga koʻchyapman». Maqsad aniq boʻlmasa, agent oʻtkazib yuborish mumkin boʻlgan bir-ikki savol beradi (qaysi shahar, taxminan qachon), soʻng 40–150 ta soʻz va qisqa ibora («la cuenta, por favor») tuzadi. Siz allaqachon biladigan soʻzlar oʻz natijasini saqlaydi.
+Asosiy qism ~450 ta kundalik soʻzni oʻrgatadi, eng koʻp ishlatiladiganlari birinchi. Mavzu bitta maqsad uchun kerakli soʻzlarni oldinga qoʻyadi: `/lazy-polyglot:topic Barselonadagi restoranlar, 20-noyabrgacha`, «DELE A2 imtihoni uchun mavzu», «Rimga koʻchyapman». Maqsad aniq boʻlmasa, agent oʻtkazib yuborish mumkin boʻlgan bir-ikki savol beradi (qaysi shahar, taxminan qachon), soʻng 40–150 ta soʻz va qisqa ibora («la cuenta, por favor») tuzadi. Siz allaqachon biladigan soʻzlar oʻz natijasini saqlaydi.
 
 - Mavzu soʻzlari javoblarda, `/cards` va placement da sanagacha yoki `topic end` gacha birinchi keladi.
 - `status` har bir faol mavzuni koʻrsatadi: `Topic Barcelona restaurants: 23/62 passed (18 words, 5 phrases) · 41 days left`.
@@ -413,6 +413,10 @@ Eng qimmatli hissa — bu sizning tilingiz, va [docs/AddLanguage.md](docs/AddLan
 - Leksik bloklar (butun iboralar), yadroning katta qismi oʻzlashtirilgach
 - Spinner fe'llarida ispancha gerundiylar («Pensando…»)
 - Yana koʻproq tillar — sizniki ham boʻladimi? ([docs/AddLanguage.md](docs/AddLanguage.md))
+
+## Soʻz chastotasi: manbalar
+
+Yangi soʻzlar kelish tartibini har bir tushuncha uchun bitta chastota darajasi belgilaydi; uni `scripts/rank-words.ts` oldindan hisoblaydi. Repozitoriyda begona chastota roʻyxatlari va korpus matnlari yoʻq. Ranks were derived from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (content CC BY-SA 4.0), built from the OpenSubtitles2018 corpus via [OPUS](https://opus.nlpl.eu/), subtitles from [opensubtitles.org](http://www.opensubtitles.org/) (P. Lison and J. Tiedemann, *OpenSubtitles2016: Extracting Large Parallel Corpora from Movie and TV Subtitles*, LREC 2016), and from the [Leipzig Corpora Collection](https://wortschatz.uni-leipzig.de/en/download), news 2020 corpora, CC BY (D. Goldhahn, T. Eckart and U. Quasthoff, *Building Large Monolingual Dictionaries at the Leipzig Corpora Collection: From 100 to 200 Languages*, LREC 2012). Soʻz roʻyxatlarining oʻzi bizniki.
 
 ## Litsenziya
 

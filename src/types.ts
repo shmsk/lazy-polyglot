@@ -12,7 +12,7 @@ export interface Concept {
   pos: Pos;
   /** Vocabulary band: 1 = core (~400), 2 → 1000, 3 → 3000. Unlocked progressively. */
   tier: number;
-  /** Optional corpus frequency rank — reserved for tier-2+ ingestion. */
+  /** Order new words come in, most useful first: 1..N, computed by scripts/rank-words.ts from word frequency. */
   rank?: number;
   gloss: Record<string, string>;
   /** Other right answers by native-language code ("kid" for child): accepted when grading, never shown. */
@@ -33,6 +33,8 @@ export interface Word {
   target: string;
   pos: Pos;
   tier: number;
+  /** The concept's rank: new words come in this order. */
+  rank?: number;
   gloss: Record<string, string>;
   /** Other right answers, as on the concept: graded, never shown. */
   alt?: Record<string, string[]>;

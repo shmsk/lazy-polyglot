@@ -1,0 +1,19 @@
+{
+  "to-be": ["oluyor", "oldu", "olur", "olacak", "olmuş"],
+  "to-go": ["gidiyor", "gidiyorum", "gider", "gitti", "gidecek", "gitmiş"],
+  "to-come": ["geliyor", "geldi", "gelir", "gelecek"],
+  "to-see": ["görüyor", "gördü", "görür"],
+  "to-give": ["veriyor", "verdi", "verir"],
+  "to-know": ["biliyor", "bildi", "bilir"],
+  "to-take": ["alıyor", "aldı", "alır"],
+  "to-find": ["buluyor", "buldu", "bulur"],
+  "to-eat": ["yiyor", "yedi", "yiyecek"],
+  "to-feel": ["hissediyor", "hissetti", "hisseder"],
+  "to-lose": ["kaybediyor", "kaybetti", "kaybeder"],
+  "to-stay": ["kalıyor", "kaldı", "kalır"],
+  "to-die": ["ölüyor", "öldü", "ölür"],
+  "to-arrive": ["varıyor", "vardı", "varır"],
+  "to-want": ["istiyor", "istedi", "ister"],
+  "to-do": ["yapıyor", "yaptı", "yapar"],
+  "to-say": ["söylüyor", "söyledi", "söyler"]
+}

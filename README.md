@@ -193,7 +193,7 @@ flowchart LR
 ```
 
 - **Concept-keyed vocabulary**: meanings live once in `data/concepts.json` (id, pos, tier, glosses per native language); each `data/wordlists/<lang>.json` is a thin concept→lemma map, so adding a language is one small file and glosses never drift
-- **Wordlists**: ~400 core content words per language (noun/verb/adj/adv) plus the 30 numerals, no function words; the tier field reserves room for the →1000-word band, unlocked when the core is ~80% absorbed
+- **Wordlists**: ~400 core content words per language (noun/verb/adj/adv) plus the 30 numerals, no function words, close in spirit to basic vocabularies like the Swadesh lists. New words come most frequent first, by a rank computed from subtitle and news frequency ([credits](#word-frequency-credits)); the tier field reserves room for the →1000-word band, unlocked when the core is ~80% absorbed
 - **Per-language progress**: state lives in `~/.lazy-polyglot/state.<lang>.json`, keyed by concept id — progress survives lemma fixes and can be compared across languages ("you know *sun* in 3 of 5")
 - **Interval ladder**: each word comes back after 30 min, 8 h, 1 day, 4 days, 2 weeks, 1 month, then 6 months. It climbs a step only when a reply actually uses it while it is due; words that are due come first, and a quarter of each list stays open for new words
 - **Honest counting**: after the reply, a Stop hook (or the host's after-reply event) reads it back, and only the words it used count as shown. A host without such an event counts the words served, as before
@@ -207,7 +207,7 @@ flowchart LR
 
 ## Topics: words for a trip or an exam
 
-The core teaches the ~450 most frequent words. A topic puts the words for one goal first: `/lazy-polyglot:topic restaurants in Barcelona by Nov 20`, "a topic for my DELE A2 exam", "I'm moving to Rome". If the goal is vague, the agent asks one or two questions you can skip (which city, roughly when), then builds 40–150 words and short phrases ("la cuenta, por favor"). Words you already know reuse their progress.
+The core teaches ~450 everyday words, the most frequent first. A topic puts the words for one goal first: `/lazy-polyglot:topic restaurants in Barcelona by Nov 20`, "a topic for my DELE A2 exam", "I'm moving to Rome". If the goal is vague, the agent asks one or two questions you can skip (which city, roughly when), then builds 40–150 words and short phrases ("la cuenta, por favor"). Words you already know reuse their progress.
 
 - Topic words come first in replies, `/cards` and placement until the date, or until `topic end`.
 - `status` shows each running topic: `Topic Barcelona restaurants: 23/62 passed (18 words, 5 phrases) · 41 days left`.
@@ -408,6 +408,10 @@ The most valuable contribution is your language, and [docs/AddLanguage.md](docs/
 - Lexical chunks (whole phrases) once most of the core is absorbed
 - Spanish gerunds in the spinner verbs ("Pensando…")
 - More languages — yours? ([docs/AddLanguage.md](docs/AddLanguage.md))
+
+## Word frequency credits
+
+The order new words come in uses one frequency rank per concept, computed offline by `scripts/rank-words.ts`. No third-party frequency lists or corpus text are in this repository. Ranks were derived from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave (content CC BY-SA 4.0), built from the OpenSubtitles2018 corpus via [OPUS](https://opus.nlpl.eu/), subtitles from [opensubtitles.org](http://www.opensubtitles.org/) (P. Lison and J. Tiedemann, *OpenSubtitles2016: Extracting Large Parallel Corpora from Movie and TV Subtitles*, LREC 2016), and from the [Leipzig Corpora Collection](https://wortschatz.uni-leipzig.de/en/download), news 2020 corpora, CC BY (D. Goldhahn, T. Eckart and U. Quasthoff, *Building Large Monolingual Dictionaries at the Leipzig Corpora Collection: From 100 to 200 Languages*, LREC 2012). The word lists themselves are our own.
 
 ## License
 

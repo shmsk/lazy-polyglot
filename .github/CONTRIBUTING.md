@@ -17,6 +17,8 @@ bun tests/validate-wordlist.ts  # data validation (add --full when contributing 
 
 All three must be green before a PR. CI runs the same commands.
 
+A new concept in `data/concepts.json` needs a rank: run `bun scripts/rank-words.ts <work-dir>` (it downloads the frequency sources into `<work-dir>`; never commit them) and commit the updated ranks. `tests/rank.test.ts` fails until every concept has one.
+
 ### Host smoke tests
 
 [`.github/workflows/hosts-smoke.yml`](workflows/hosts-smoke.yml) installs Codex CLI, opencode, Hermes Agent and OpenClaw on a clean runner and checks each adapter end to end. Never run these hosts on your own machine for this; the runner is thrown away afterwards.

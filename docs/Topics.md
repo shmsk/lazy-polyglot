@@ -4,7 +4,7 @@ Written for an AI agent (Claude Code, Codex, …); a person can follow it too. F
 
 ## What a topic is
 
-The core teaches the ~450 most frequent words. A topic adds what one goal needs: a trip ("restaurants in Barcelona"), an exam ("DELE A2"), a move ("renting a flat in Rome"). Its entries come first in replies, cards and placement until the topic ends: on its date, or with `topic end`.
+The core teaches ~450 everyday words, the most frequent first. A topic adds what one goal needs: a trip ("restaurants in Barcelona"), an exam ("DELE A2"), a move ("renting a flat in Rome"). Its entries come first in replies, cards and placement until the topic ends: on its date, or with `topic end`.
 
 Limits: two topics run at once; a third needs the learner's yes (`--yes`); a fourth is refused until one ends.
 

@@ -173,6 +173,8 @@ const NUMBERS_DIR = join(BUNDLED, "numbers");
 const USER_NUMBERS_DIR = join(DATA_DIR, "numbers");
 const READINGS_DIR = join(BUNDLED, "readings");
 const USER_READINGS_DIR = join(DATA_DIR, "readings");
+const IRREGULAR_DIR = join(BUNDLED, "irregular");
+const USER_IRREGULAR_DIR = join(DATA_DIR, "irregular");
 export const CONCEPTS_PATH = join(BUNDLED, "concepts.json");
 export const HOMOGRAPHS_PATH = join(BUNDLED, "homographs.json");
 const CHANGELOG_PATH = join(REPO_ROOT, "CHANGELOG.md");
@@ -289,7 +291,22 @@ export function loadReadings(lang: string): Record<string, string> {
   return { ...(base ? readingsFile(base) : {}), ...readingsFile(lang) };
 }
 
-/** Concepts joined with their lemmas in the target language. */
+/** Irregular verb forms (concept id → forms) for exactly this code; {} when there is no file. */
+function irregularFile(lang: string): Record<string, string[]> {
+  const path = resolveData(USER_IRREGULAR_DIR, IRREGULAR_DIR, lang);
+  return path ? readJson<Record<string, string[]>>(path, `irregular ${lang}`) : {};
+}
+
+/**
+ * Forms of irregular verbs that share no root with the lemma (essere → è, sono; to go → went),
+ * so a reply that wove one still counts. A variant's file overlays its base's, like readings.
+ */
+export function loadIrregular(lang: string): Record<string, string[]> {
+  const base = baseLang(normalizeLang(lang));
+  return { ...(base ? irregularFile(base) : {}), ...irregularFile(lang) };
+}
+
+/** Concepts joined with their lemmas in the target language, in rank order (most useful first; unranked keep file order, last). */
 export function loadWordlist(lang: string): Word[] {
   const mapping = loadWordMapping(lang);
   const readings = loadReadings(lang);
@@ -310,9 +327,10 @@ export function loadWordlist(lang: string): Word[] {
     const differs = baseTarget !== undefined && baseTarget !== lemma;
     const baseNote = differs ? rude.get(baseTarget) : undefined;
     const ipa = readings[id];
-    words.push({ id, target: lemma, pos: c.pos, tier: c.tier, gloss: c.gloss, ...(c.alt ? { alt: c.alt } : {}), ...(differs ? { baseTarget } : {}), ...(baseNote ? { baseNote } : {}), ...(ipa ? { ipa } : {}) });
+    words.push({ id, target: lemma, pos: c.pos, tier: c.tier, ...(c.rank !== undefined ? { rank: c.rank } : {}), gloss: c.gloss, ...(c.alt ? { alt: c.alt } : {}), ...(differs ? { baseTarget } : {}), ...(baseNote ? { baseNote } : {}), ...(ipa ? { ipa } : {}) });
   }
-  return words;
+  // every algorithm and the placement cards take new words in list order, so ranking happens once, here
+  return words.sort((a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER));
 }
 
 /** False friends and rude words for exactly this code; [] when there is no file. */

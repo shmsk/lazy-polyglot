@@ -67,25 +67,25 @@ describe("placement CLI", () => {
     const dir = fresh();
     const next = run(dir, ["placement", "next", "3"]);
     expect(next.status).toBe(0);
-    expect(next.stdout).toContain("1. casa");
-    expect(next.stdout).not.toContain("дом");
-    const ans = run(dir, ["placement", "answer", "casa=дом", "tempo=", "giorno=кошка"]);
+    expect(next.stdout).toContain("1. essere");
+    expect(next.stdout).not.toContain("быть");
+    const ans = run(dir, ["placement", "answer", "essere=быть", "stare=", "avere=кошка"]);
     expect(ans.status).toBe(0);
-    expect(ans.stdout).toContain("✓ casa");
-    expect(isAbsorbed(state(dir).house)).toBe(true);
-    expect(state(dir).time).toBeUndefined();
-    expect(config(dir).placementSkipped.it).toContain("time");
+    expect(ans.stdout).toContain("✓ essere");
+    expect(isAbsorbed(state(dir)["to-be"])).toBe(true);
+    expect(state(dir)["to-be-state"]).toBeUndefined();
+    expect(config(dir).placementSkipped.it).toContain("to-be-state");
     const again = run(dir, ["placement", "next", "1"]);
-    expect(again.stdout).not.toContain("casa");
-    expect(again.stdout).not.toContain("tempo");
+    expect(again.stdout).not.toContain("essere");
+    expect(again.stdout).not.toContain("stare");
   });
 
   test("interactive run saves as it goes and stops on q", () => {
     const dir = fresh();
-    const out = run(dir, ["placement"], "дом\n\nq\n");
+    const out = run(dir, ["placement"], "быть\n\nq\n");
     expect(out.status).toBe(0);
     expect(out.stdout).toContain("Known this round: 1/2");
-    expect(isAbsorbed(state(dir).house)).toBe(true);
+    expect(isAbsorbed(state(dir)["to-be"])).toBe(true);
     expect(config(dir).placementSkipped.it).toHaveLength(1);
   });
 

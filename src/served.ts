@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { State } from "./types.ts";
 import { markMissed, markWoven } from "./ladder.ts";
 import { wovenLemmas } from "./weave-detect.ts";
+import { loadIrregular } from "./store.ts";
 
 /**
  * What the last instruction offered, per session, until the reply is read back.
@@ -70,11 +71,13 @@ export function takeServed(dir: string, sessionId: string, now: string): ServedR
 /**
  * Fold one settled offer into the state. `reply` null means the host could not
  * read it back: every pick counts as woven. Otherwise picks the reply wove climb,
- * the rest are missed; known words it used count as a showing.
+ * the rest are missed; known words it used count as a showing. `irregular` (concept id →
+ * forms) lets è count for essere.
  */
-export function settleServed(state: State, rec: ServedRecord, reply: string | null, now: string): State {
+export function settleServed(state: State, rec: ServedRecord, reply: string | null, now: string, irregular: Record<string, string[]> = loadIrregular(rec.lang)): State {
   const all = { ...rec.picks, ...rec.known };
-  const used = new Set(reply === null ? Object.values(rec.picks) : wovenLemmas(reply, Object.values(all)));
+  const forms = Object.fromEntries(Object.entries(all).filter(([id]) => irregular[id]).map(([id, lemma]) => [lemma, irregular[id]!]));
+  const used = new Set(reply === null ? Object.values(rec.picks) : wovenLemmas(reply, Object.values(all), forms));
   const ids = (m: Record<string, string>, hit: boolean) => Object.entries(m).filter(([, t]) => used.has(t) === hit).map(([id]) => id);
   markWoven(state, [...ids(rec.picks, true), ...ids(rec.known, true)], now);
   markMissed(state, ids(rec.picks, false), now);
