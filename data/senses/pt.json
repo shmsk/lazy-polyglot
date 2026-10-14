@@ -1,0 +1,607 @@
+{
+  "house": [
+    { "id": "home", "use": "accept", "gloss": { "en": "home" } }
+  ],
+  "time": [
+    { "id": "weather", "use": "weave", "gloss": { "en": "weather", "ru": "погода", "uz": "ob-havo" } }
+  ],
+  "man": [
+    { "id": "human", "use": "accept", "gloss": { "en": "human", "uz": "inson" } }
+  ],
+  "woman": [
+    { "id": "wife", "use": "weave", "gloss": { "en": "wife", "ru": "жена", "uz": "xotin" } }
+  ],
+  "child": [
+    { "id": "kid", "use": "accept", "gloss": { "en": "kid" } }
+  ],
+  "world": [
+    { "id": "universe", "use": "accept", "gloss": { "en": "universe", "ru": "вселенная", "uz": "koinot" } }
+  ],
+  "head": [
+    { "id": "mind", "use": "accept", "gloss": { "en": "mind", "ru": "разум", "uz": "aql" } }
+  ],
+  "work": [
+    { "id": "job", "use": "accept", "gloss": { "en": "job" } }
+  ],
+  "afternoon": [
+    { "id": "late", "use": "weave", "gloss": { "en": "late", "ru": "поздно", "uz": "kech" } }
+  ],
+  "hour": [
+    { "id": "time", "use": "accept", "concept": "time" }
+  ],
+  "moment": [
+    { "id": "time", "use": "accept", "concept": "time" }
+  ],
+  "time-occasion": [
+    { "id": "turn", "use": "weave", "gloss": { "en": "turn", "ru": "очередь", "uz": "navbat" } }
+  ],
+  "people": [
+    { "id": "we", "use": "weave", "gloss": { "en": "we", "ru": "мы", "uz": "biz" } },
+    { "id": "folks", "use": "accept", "gloss": { "en": "folks", "ru": "народ" } }
+  ],
+  "son": [
+    { "id": "child", "use": "accept", "concept": "child" }
+  ],
+  "daughter": [
+    { "id": "child", "use": "accept", "concept": "child" }
+  ],
+  "name": [
+    { "id": "noun", "use": "accept", "gloss": { "en": "noun", "ru": "существительное" } }
+  ],
+  "word": [
+    { "id": "promise", "use": "accept", "gloss": { "en": "promise", "ru": "обещание", "uz": "va'da" } }
+  ],
+  "language": [
+    { "id": "tongue", "use": "weave", "gloss": { "en": "tongue" } }
+  ],
+  "story": [
+    { "id": "history", "use": "weave", "gloss": { "en": "history", "uz": "tarix" } }
+  ],
+  "paper": [
+    { "id": "role", "use": "weave", "gloss": { "en": "role", "ru": "роль", "uz": "rol" } }
+  ],
+  "letter": [
+    { "id": "card", "use": "weave", "gloss": { "en": "playing card", "ru": "игральная карта", "uz": "o'yin kartasi" } }
+  ],
+  "reason": [
+    { "id": "right", "use": "weave", "gloss": { "en": "being right", "ru": "правота", "uz": "haqlik" } },
+    { "id": "ratio", "use": "accept", "gloss": { "en": "ratio", "ru": "пропорция", "uz": "nisbat" } }
+  ],
+  "way": [
+    { "id": "manner", "use": "accept", "gloss": { "en": "manner", "ru": "манера", "uz": "uslub" } }
+  ],
+  "form": [
+    { "id": "shape", "use": "weave", "gloss": { "en": "shape" } }
+  ],
+  "place": [
+    { "id": "seat", "use": "weave", "gloss": { "en": "seat", "uz": "o'rin" } }
+  ],
+  "path": [
+    { "id": "route", "use": "accept", "gloss": { "en": "route", "ru": "маршрут", "uz": "yo'nalish" } }
+  ],
+  "door": [
+    { "id": "port", "use": "accept", "gloss": { "en": "port (USB)", "ru": "разъём", "uz": "port" } }
+  ],
+  "floor-surface": [
+    { "id": "ground", "use": "weave", "gloss": { "en": "ground", "ru": "земля", "uz": "yer" } }
+  ],
+  "room": [
+    { "id": "bedroom", "use": "weave", "gloss": { "en": "bedroom", "ru": "спальня", "uz": "yotoqxona" } },
+    { "id": "quarter", "use": "accept", "gloss": { "en": "quarter", "ru": "четверть", "uz": "chorak" } }
+  ],
+  "kitchen": [
+    { "id": "cooking", "use": "weave", "gloss": { "en": "cooking", "ru": "готовка", "uz": "ovqat pishirish" } }
+  ],
+  "table": [
+    { "id": "desk", "use": "accept", "gloss": { "en": "desk", "ru": "письменный стол", "uz": "yozuv stoli" } }
+  ],
+  "food": [
+    { "id": "meal", "use": "accept", "gloss": { "en": "meal", "ru": "приём пищи" } }
+  ],
+  "coffee": [
+    { "id": "cafe", "use": "weave", "gloss": { "en": "café", "ru": "кафе", "uz": "kafe" } }
+  ],
+  "glass": [
+    { "id": "cup", "use": "accept", "gloss": { "en": "cup", "ru": "чашка", "uz": "piyola" } }
+  ],
+  "money": [
+    { "id": "cash", "use": "accept", "gloss": { "en": "cash", "ru": "наличные", "uz": "naqd pul" } }
+  ],
+  "price": [
+    { "id": "cost", "use": "accept", "gloss": { "en": "cost", "ru": "стоимость", "uz": "xarajat" } }
+  ],
+  "shop": [
+    { "id": "store", "use": "accept", "gloss": { "en": "store" } }
+  ],
+  "market": [
+    { "id": "supermarket", "use": "accept", "gloss": { "en": "supermarket", "ru": "супермаркет", "uz": "supermarket" } }
+  ],
+  "class": [
+    { "id": "lesson", "use": "accept", "gloss": { "en": "lesson" } }
+  ],
+  "teacher": [
+    { "id": "professor", "use": "weave", "gloss": { "en": "professor", "ru": "профессор", "uz": "professor" } }
+  ],
+  "student": [
+    { "id": "pupil", "use": "accept", "gloss": { "en": "pupil", "ru": "ученик", "uz": "o'quvchi" } }
+  ],
+  "illness": [
+    { "id": "disease", "use": "accept", "gloss": { "en": "disease" } }
+  ],
+  "health": [
+    { "id": "cheers", "use": "weave", "gloss": { "en": "cheers", "ru": "за здоровье", "uz": "sog'lig'ingiz uchun" } }
+  ],
+  "skin": [
+    { "id": "fur", "use": "accept", "gloss": { "en": "fur", "ru": "мех", "uz": "mo'yna" } }
+  ],
+  "finger": [
+    { "id": "toe", "use": "weave", "gloss": { "en": "toe" } }
+  ],
+  "sky": [
+    { "id": "heaven", "use": "weave", "gloss": { "en": "heaven", "ru": "небеса", "uz": "jannat" } }
+  ],
+  "earth": [
+    { "id": "land", "use": "accept", "gloss": { "en": "land", "ru": "суша", "uz": "quruqlik" } },
+    { "id": "soil", "use": "weave", "gloss": { "en": "soil", "uz": "tuproq" } }
+  ],
+  "sea": [
+    { "id": "ocean", "use": "accept", "gloss": { "en": "ocean", "ru": "океан", "uz": "okean" } }
+  ],
+  "field": [
+    { "id": "countryside", "use": "weave", "gloss": { "en": "countryside", "ru": "сельская местность", "uz": "qishloq" } }
+  ],
+  "heat": [
+    { "id": "warmth", "use": "accept", "gloss": { "en": "warmth", "ru": "тепло", "uz": "iliqlik" } }
+  ],
+  "light": [
+    { "id": "electricity", "use": "weave", "gloss": { "en": "electricity", "ru": "электричество", "uz": "elektr toki" } }
+  ],
+  "game": [
+    { "id": "match", "use": "weave", "gloss": { "en": "match", "ru": "матч" } }
+  ],
+  "party": [
+    { "id": "holiday", "use": "weave", "gloss": { "en": "holiday" } }
+  ],
+  "trip": [
+    { "id": "journey", "use": "accept", "gloss": { "en": "journey" } }
+  ],
+  "road": [
+    { "id": "highway", "use": "accept", "gloss": { "en": "highway", "ru": "шоссе", "uz": "avtomagistral" } }
+  ],
+  "strength": [
+    { "id": "force", "use": "accept", "gloss": { "en": "force" } }
+  ],
+  "sleep": [
+    { "id": "sleepiness", "use": "weave", "gloss": { "en": "sleepiness", "ru": "сонливость", "uz": "uyquchanlik" } }
+  ],
+  "mister": [
+    { "id": "gentleman", "use": "accept", "gloss": { "en": "gentleman" } }
+  ],
+  "madam": [
+    { "id": "lady", "use": "accept", "gloss": { "en": "lady" } }
+  ],
+  "number": [
+    { "id": "size", "use": "accept", "gloss": { "en": "size", "ru": "размер", "uz": "o'lcham" } }
+  ],
+  "end": [
+    { "id": "purpose", "use": "accept", "gloss": { "en": "purpose", "ru": "цель", "uz": "maqsad" } }
+  ],
+  "middle": [
+    { "id": "half", "use": "weave", "gloss": { "en": "half", "ru": "половина", "uz": "yarim" } },
+    { "id": "means", "use": "weave", "gloss": { "en": "means", "ru": "средство", "uz": "vosita" } }
+  ],
+  "center": [
+    { "id": "downtown", "use": "accept", "gloss": { "en": "downtown", "ru": "центр города", "uz": "shahar markazi" } }
+  ],
+  "point": [
+    { "id": "dot", "use": "weave", "gloss": { "en": "full stop" } },
+    { "id": "score", "use": "accept", "gloss": { "en": "score", "ru": "очки", "uz": "ball" } }
+  ],
+  "line": [
+    { "id": "thread", "use": "accept", "gloss": { "en": "thread", "ru": "нитка", "uz": "ip" } },
+    { "id": "row", "use": "accept", "gloss": { "en": "row", "ru": "ряд", "uz": "qator" } }
+  ],
+  "key": [
+    { "id": "bracket", "use": "accept", "gloss": { "en": "bracket", "ru": "скобка", "uz": "qavs" } }
+  ],
+  "gift": [
+    { "id": "present-time", "use": "weave", "gloss": { "en": "present time", "ru": "настоящее время", "uz": "hozirgi vaqt" } }
+  ],
+  "newspaper": [
+    { "id": "news", "use": "accept", "concept": "news" }
+  ],
+  "phone": [
+    { "id": "mobile", "use": "accept", "gloss": { "en": "mobile", "ru": "мобильный", "uz": "mobil" } }
+  ],
+  "movie": [
+    { "id": "film", "use": "accept", "gloss": { "en": "film" } }
+  ],
+  "image": [
+    { "id": "picture", "use": "accept", "gloss": { "en": "picture", "ru": "картина", "uz": "rasm" } }
+  ],
+  "to-do": [
+    { "id": "make", "use": "weave", "gloss": { "en": "to make", "uz": "yasamoq" } }
+  ],
+  "to-say": [
+    { "id": "tell", "use": "accept", "gloss": { "en": "to tell" } }
+  ],
+  "to-speak": [
+    { "id": "talk", "use": "accept", "gloss": { "en": "to talk", "ru": "беседовать", "uz": "suhbatlashmoq" } }
+  ],
+  "to-see": [
+    { "id": "watch", "use": "weave", "gloss": { "en": "to watch", "uz": "tomosha qilmoq", "ru": "смотреть" } }
+  ],
+  "to-hear": [
+    { "id": "listen", "use": "weave", "gloss": { "en": "to listen", "ru": "слушать", "uz": "tinglamoq" } }
+  ],
+  "to-know": [
+    { "id": "know-how", "use": "weave", "gloss": { "en": "to know how", "ru": "уметь" } },
+    { "id": "taste", "use": "accept", "gloss": { "en": "to taste", "ru": "иметь вкус", "uz": "ta'mi bor" } }
+  ],
+  "to-know-someone": [
+    { "id": "meet", "use": "weave", "gloss": { "en": "to meet", "ru": "знакомиться", "uz": "tanishmoq" } }
+  ],
+  "to-reckon": [
+    { "id": "find", "use": "accept", "concept": "to-find" }
+  ],
+  "to-be-able": [
+    { "id": "power", "use": "accept", "gloss": { "en": "power", "ru": "власть", "uz": "hokimiyat" } },
+    { "id": "can", "use": "accept", "gloss": { "en": "can" } }
+  ],
+  "must": [
+    { "id": "owe", "use": "weave", "gloss": { "en": "to owe", "uz": "qarzdor bo'lmoq" } },
+    { "id": "duty", "use": "accept", "gloss": { "en": "duty", "ru": "долг", "uz": "burch" } }
+  ],
+  "to-like": [
+    { "id": "enjoy", "use": "accept", "gloss": { "en": "to enjoy", "ru": "наслаждаться", "uz": "zavqlanmoq" } }
+  ],
+  "to-take": [
+    { "id": "catch", "use": "weave", "gloss": { "en": "to catch", "ru": "ловить", "uz": "ushlamoq" } },
+    { "id": "pick", "use": "weave", "gloss": { "en": "to pick up", "ru": "забирать", "uz": "olib ketmoq" } },
+    { "id": "get", "use": "accept", "gloss": { "en": "to get" } }
+  ],
+  "to-leave": [
+    { "id": "allow", "use": "accept", "concept": "to-allow" },
+    { "id": "quit", "use": "weave", "gloss": { "en": "to quit", "ru": "бросать", "uz": "tashlamoq" } }
+  ],
+  "to-put": [
+    { "id": "set", "use": "accept", "gloss": { "en": "to set", "ru": "устанавливать", "uz": "o'rnatmoq" } }
+  ],
+  "to-carry": [
+    { "id": "lead", "use": "accept", "gloss": { "en": "to lead", "ru": "вести" } }
+  ],
+  "to-close": [
+    { "id": "shut", "use": "accept", "gloss": { "en": "to shut" } }
+  ],
+  "to-finish": [
+    { "id": "run-out", "use": "weave", "gloss": { "en": "to run out" } }
+  ],
+  "to-stay": [
+    { "id": "become", "use": "weave", "gloss": { "en": "to become", "ru": "становиться", "uz": "bo'lib qolmoq" } },
+    { "id": "located", "use": "weave", "gloss": { "en": "to be located", "uz": "joylashgan bo'lmoq", "ru": "находиться" } },
+    { "id": "remain", "use": "accept", "gloss": { "en": "to remain" } }
+  ],
+  "to-arrive": [
+    { "id": "enough", "use": "weave", "gloss": { "en": "to be enough", "ru": "хватать", "uz": "yetarli bo'lmoq" } },
+    { "id": "reach", "use": "accept", "gloss": { "en": "to reach", "uz": "yetmoq" } }
+  ],
+  "to-go-out": [
+    { "id": "leave", "use": "accept", "gloss": { "en": "to leave", "ru": "уходить", "uz": "ketmoq" } },
+    { "id": "exit", "use": "accept", "gloss": { "en": "to exit" } }
+  ],
+  "to-enter": [
+    { "id": "come-in", "use": "accept", "gloss": { "en": "to come in", "ru": "заходить" } }
+  ],
+  "to-pass": [
+    { "id": "spend", "use": "weave", "gloss": { "en": "to spend time", "ru": "проводить время", "uz": "vaqt o'tkazmoq" } },
+    { "id": "iron", "use": "accept", "gloss": { "en": "to iron", "ru": "гладить", "uz": "dazmollamoq" } },
+    { "id": "happen", "use": "accept", "concept": "to-happen" }
+  ],
+  "to-walk": [
+    { "id": "ride", "use": "weave", "gloss": { "en": "to ride", "ru": "ездить", "uz": "minmoq" } }
+  ],
+  "to-run": [
+    { "id": "flow", "use": "accept", "gloss": { "en": "to flow", "ru": "течь", "uz": "oqmoq" } }
+  ],
+  "to-go-up": [
+    { "id": "climb", "use": "accept", "gloss": { "en": "to climb", "ru": "взбираться" } },
+    { "id": "rise", "use": "accept", "gloss": { "en": "to rise", "ru": "расти", "uz": "o'smoq" } }
+  ],
+  "to-get-up": [
+    { "id": "lift", "use": "weave", "gloss": { "en": "to lift", "ru": "поднимать", "uz": "ko'tarmoq" } },
+    { "id": "withdraw", "use": "accept", "gloss": { "en": "to withdraw", "ru": "снимать деньги", "uz": "pul yechmoq" } }
+  ],
+  "to-wake-up": [
+    { "id": "agree", "use": "accept", "gloss": { "en": "to agree", "ru": "договариваться", "uz": "kelishmoq" } }
+  ],
+  "to-win": [
+    { "id": "earn", "use": "weave", "gloss": { "en": "to earn", "ru": "зарабатывать" } },
+    { "id": "receive", "use": "accept", "concept": "to-receive" }
+  ],
+  "to-lose": [
+    { "id": "miss", "use": "weave", "gloss": { "en": "to miss", "ru": "пропускать", "uz": "o'tkazib yubormoq" } }
+  ],
+  "to-search": [
+    { "id": "look-for", "use": "accept", "gloss": { "en": "to look for" } }
+  ],
+  "to-find": [
+    { "id": "meet", "use": "weave", "gloss": { "en": "to meet up", "ru": "встречаться", "uz": "uchrashmoq" } }
+  ],
+  "to-wait": [
+    { "id": "hope", "use": "accept", "gloss": { "en": "to hope", "ru": "надеяться", "uz": "umid qilmoq" } },
+    { "id": "expect", "use": "accept", "gloss": { "en": "to expect", "ru": "ожидать" } }
+  ],
+  "to-teach": [
+    { "id": "show", "use": "accept", "concept": "to-show" }
+  ],
+  "to-count": [
+    { "id": "tell", "use": "weave", "gloss": { "en": "to tell", "ru": "рассказывать", "uz": "hikoya qilmoq" } },
+    { "id": "rely", "use": "accept", "gloss": { "en": "to rely on", "ru": "рассчитывать" } }
+  ],
+  "to-ask-for": [
+    { "id": "order", "use": "weave", "gloss": { "en": "to order", "ru": "заказывать", "uz": "buyurtma bermoq" } }
+  ],
+  "to-call": [
+    { "id": "called", "use": "weave", "gloss": { "en": "to be called", "ru": "называться", "uz": "nomlanmoq" } }
+  ],
+  "to-feel": [
+    { "id": "sorry", "use": "weave", "gloss": { "en": "to be sorry", "ru": "сожалеть", "uz": "afsuslanmoq" } }
+  ],
+  "to-play": [
+    { "id": "throw", "use": "weave", "gloss": { "en": "to throw", "ru": "бросать", "uz": "otmoq" } }
+  ],
+  "to-change": [
+    { "id": "move", "use": "weave", "gloss": { "en": "to move house", "ru": "переезжать", "uz": "ko'chmoq" } }
+  ],
+  "to-create": [
+    { "id": "raise", "use": "weave", "gloss": { "en": "to raise", "ru": "растить", "uz": "tarbiyalamoq" } }
+  ],
+  "to-use": [
+    { "id": "wear", "use": "weave", "gloss": { "en": "to wear", "ru": "носить", "uz": "kiymoq" } }
+  ],
+  "to-manage-to": [
+    { "id": "get", "use": "accept", "gloss": { "en": "to get" } }
+  ],
+  "to-remember": [
+    { "id": "remind", "use": "weave", "gloss": { "en": "to remind", "ru": "напоминать", "uz": "eslatmoq" } }
+  ],
+  "to-understand": [
+    { "id": "notice", "use": "weave", "gloss": { "en": "to notice", "ru": "замечать", "uz": "payqamoq" } }
+  ],
+  "to-seem": [
+    { "id": "look-like", "use": "accept", "gloss": { "en": "to look like", "ru": "выглядеть", "uz": "ko'rinmoq" } }
+  ],
+  "good": [
+    { "id": "tasty", "use": "accept", "gloss": { "en": "tasty", "ru": "вкусный", "uz": "mazali" } }
+  ],
+  "bad": [
+    { "id": "evil", "use": "accept", "gloss": { "en": "evil", "ru": "злой", "uz": "yovuz" } }
+  ],
+  "big": [
+    { "id": "great", "use": "weave", "gloss": { "en": "great", "ru": "великий", "uz": "ulug'" } },
+    { "id": "large", "use": "accept", "gloss": { "en": "large" } }
+  ],
+  "new": [
+    { "id": "young", "use": "accept", "concept": "young" }
+  ],
+  "tall": [
+    { "id": "loud", "use": "weave", "gloss": { "en": "loud", "ru": "громкий", "uz": "baland ovozli" } },
+    { "id": "high", "use": "accept", "gloss": { "en": "high" } }
+  ],
+  "low": [
+    { "id": "short", "use": "accept", "concept": "short" },
+    { "id": "bass", "use": "accept", "gloss": { "en": "bass", "ru": "бас", "uz": "bas" } }
+  ],
+  "strong": [
+    { "id": "loud", "use": "accept", "gloss": { "en": "loud", "ru": "громкий" } }
+  ],
+  "fast": [
+    { "id": "quick", "use": "accept", "gloss": { "en": "quick" } }
+  ],
+  "hot": [
+    { "id": "warm", "use": "weave", "gloss": { "en": "warm", "ru": "тёплый", "uz": "iliq" } }
+  ],
+  "cold": [
+    { "id": "cool", "use": "accept", "gloss": { "en": "cool", "ru": "прохладный", "uz": "salqin" } }
+  ],
+  "full": [
+    { "id": "packed", "use": "accept", "gloss": { "en": "packed", "ru": "переполненный", "uz": "gavjum" } }
+  ],
+  "certain": [
+    { "id": "correct", "use": "weave", "gloss": { "en": "correct", "ru": "правильный", "uz": "to'g'ri" } },
+    { "id": "sure", "use": "accept", "gloss": { "en": "sure", "ru": "уверенный" } }
+  ],
+  "false": [
+    { "id": "fake", "use": "weave", "gloss": { "en": "fake", "ru": "поддельный", "uz": "soxta" } }
+  ],
+  "pretty": [
+    { "id": "beautiful", "use": "accept", "gloss": { "en": "beautiful" } },
+    { "id": "nice", "use": "accept", "gloss": { "en": "nice", "ru": "приятный", "uz": "yoqimli" } }
+  ],
+  "expensive": [
+    { "id": "dear", "use": "weave", "gloss": { "en": "dear", "uz": "aziz" } }
+  ],
+  "happy": [
+    { "id": "glad", "use": "accept", "gloss": { "en": "glad", "ru": "рад", "uz": "xursand" } }
+  ],
+  "next": [
+    { "id": "near", "use": "accept", "concept": "near" }
+  ],
+  "last": [
+    { "id": "latest", "use": "accept", "gloss": { "en": "latest", "ru": "новейший", "uz": "eng so'nggi" } }
+  ],
+  "sole-only-one": [
+    { "id": "unique", "use": "weave", "gloss": { "en": "unique", "ru": "уникальный", "uz": "noyob" } },
+    { "id": "only", "use": "accept", "gloss": { "en": "only" } }
+  ],
+  "safe": [
+    { "id": "insurance", "use": "weave", "gloss": { "en": "insurance", "ru": "страховка", "uz": "sug'urta" } },
+    { "id": "certain", "use": "accept", "concept": "certain" }
+  ],
+  "clear": [
+    { "id": "of-course", "use": "weave", "gloss": { "en": "of course", "ru": "конечно", "uz": "albatta" } },
+    { "id": "light-colored", "use": "weave", "gloss": { "en": "light-colored", "ru": "светлый", "uz": "och rangli" } }
+  ],
+  "ready": [
+    { "id": "done", "use": "accept", "gloss": { "en": "done", "ru": "готово", "uz": "bajarildi" } }
+  ],
+  "strange": [
+    { "id": "stranger", "use": "weave", "gloss": { "en": "stranger", "ru": "незнакомец", "uz": "begona" } }
+  ],
+  "common": [
+    { "id": "ordinary", "use": "accept", "gloss": { "en": "ordinary", "uz": "oddiy" } }
+  ],
+  "whole": [
+    { "id": "entire", "use": "accept", "gloss": { "en": "entire" } }
+  ],
+  "better": [
+    { "id": "best", "use": "accept", "gloss": { "en": "best", "ru": "лучший", "uz": "eng yaxshi" } }
+  ],
+  "worse": [
+    { "id": "worst", "use": "accept", "gloss": { "en": "worst", "ru": "худший", "uz": "eng yomon" } }
+  ],
+  "well": [
+    { "id": "very", "use": "accept", "concept": "very" },
+    { "id": "fine", "use": "accept", "gloss": { "en": "fine", "ru": "нормально" } }
+  ],
+  "badly": [
+    { "id": "evil", "use": "accept", "gloss": { "en": "evil", "ru": "зло", "uz": "yomonlik" } },
+    { "id": "barely", "use": "weave", "gloss": { "en": "barely", "ru": "едва", "uz": "arang" } }
+  ],
+  "very": [
+    { "id": "a-lot", "use": "weave", "gloss": { "en": "a lot", "ru": "много", "uz": "ko'p" } }
+  ],
+  "little": [
+    { "id": "a-bit", "use": "weave", "gloss": { "en": "a bit", "ru": "немного", "uz": "ozgina" } },
+    { "id": "few", "use": "accept", "gloss": { "en": "few", "uz": "oz" } }
+  ],
+  "more": [
+    { "id": "plus", "use": "weave", "gloss": { "en": "plus", "ru": "плюс", "uz": "plyus" } },
+    { "id": "most", "use": "accept", "gloss": { "en": "most", "ru": "самый", "uz": "eng ko'p" } }
+  ],
+  "less": [
+    { "id": "minus", "use": "weave", "gloss": { "en": "minus", "ru": "минус", "uz": "minus" } },
+    { "id": "except", "use": "weave", "gloss": { "en": "except", "ru": "кроме", "uz": "tashqari" } }
+  ],
+  "today": [
+    { "id": "nowadays", "use": "accept", "gloss": { "en": "nowadays", "ru": "в наши дни" } }
+  ],
+  "after": [
+    { "id": "later", "use": "weave", "gloss": { "en": "later", "ru": "позже", "uz": "keyinroq" } },
+    { "id": "then", "use": "accept", "gloss": { "en": "then", "ru": "затем", "uz": "so'ng" } }
+  ],
+  "before": [
+    { "id": "earlier", "use": "accept", "gloss": { "en": "earlier", "uz": "oldinroq" } }
+  ],
+  "still": [
+    { "id": "yet", "use": "weave", "gloss": { "en": "yet", "ru": "ещё", "uz": "hali" } },
+    { "id": "even", "use": "accept", "gloss": { "en": "even", "ru": "даже", "uz": "hatto" } }
+  ],
+  "already": [
+    { "id": "now", "use": "accept", "concept": "now" }
+  ],
+  "like-this": [
+    { "id": "thus", "use": "accept", "gloss": { "en": "thus", "ru": "таким образом", "uz": "shu tariqa" } },
+    { "id": "so", "use": "accept", "gloss": { "en": "so" } }
+  ],
+  "almost": [
+    { "id": "nearly", "use": "accept", "gloss": { "en": "nearly" } }
+  ],
+  "also": [
+    { "id": "too", "use": "accept", "gloss": { "en": "too" } }
+  ],
+  "right": [
+    { "id": "law", "use": "accept", "concept": "law" },
+    { "id": "right-hand", "use": "weave", "gloss": { "en": "right-hand", "ru": "правый", "uz": "o'ng" } },
+    { "id": "straight", "use": "accept", "gloss": { "en": "straight", "ru": "прямой", "uz": "to'g'ri" } }
+  ],
+  "boss": [
+    { "id": "chief", "use": "accept", "gloss": { "en": "chief", "ru": "главный" } }
+  ],
+  "client": [
+    { "id": "customer", "use": "accept", "gloss": { "en": "customer" } }
+  ],
+  "service": [
+    { "id": "work", "use": "accept", "concept": "work" }
+  ],
+  "business": [
+    { "id": "deal", "use": "weave", "gloss": { "en": "deal", "ru": "сделка", "uz": "bitim" } },
+    { "id": "thing", "use": "accept", "concept": "thing" }
+  ],
+  "mistake": [
+    { "id": "error", "use": "accept", "gloss": { "en": "error" } }
+  ],
+  "change": [
+    { "id": "move", "use": "weave", "gloss": { "en": "move", "ru": "переезд", "uz": "ko'chish" } },
+    { "id": "gear", "use": "accept", "gloss": { "en": "gear", "ru": "передача", "uz": "uzatma" } }
+  ],
+  "to-receive": [
+    { "id": "host", "use": "weave", "gloss": { "en": "to host guests", "ru": "принимать гостей", "uz": "mehmon kutmoq" } },
+    { "id": "get", "use": "accept", "gloss": { "en": "to get" } }
+  ],
+  "to-appear": [
+    { "id": "show-up", "use": "accept", "gloss": { "en": "to show up", "ru": "объявиться", "uz": "kelib qolmoq" } }
+  ],
+  "to-serve": [
+    { "id": "fit", "use": "weave", "gloss": { "en": "to fit", "ru": "подходить", "uz": "mos kelmoq" } },
+    { "id": "suit", "use": "accept", "gloss": { "en": "to suit", "ru": "устраивать", "uz": "to'g'ri kelmoq" } }
+  ],
+  "to-take-out": [
+    { "id": "take", "use": "accept", "concept": "to-take" },
+    { "id": "remove", "use": "accept", "gloss": { "en": "to remove", "ru": "убирать", "uz": "olib tashlamoq" } },
+    { "id": "get", "use": "accept", "gloss": { "en": "to get" } }
+  ],
+  "to-maintain": [
+    { "id": "keep", "use": "weave", "gloss": { "en": "to keep", "ru": "сохранять", "uz": "saqlamoq" } }
+  ],
+  "to-present": [
+    { "id": "introduce", "use": "weave", "gloss": { "en": "to introduce", "uz": "tanishtirmoq" } },
+    { "id": "show", "use": "accept", "concept": "to-show" }
+  ],
+  "to-end": [
+    { "id": "break-up", "use": "weave", "gloss": { "en": "to break up", "ru": "расставаться", "uz": "ajrashmoq" } }
+  ],
+  "to-form": [
+    { "id": "graduate", "use": "weave", "gloss": { "en": "to graduate", "ru": "окончить вуз", "uz": "bitirmoq" } }
+  ],
+  "to-depart": [
+    { "id": "break", "use": "weave", "gloss": { "en": "to break", "ru": "ломать", "uz": "sindirmoq" } },
+    { "id": "split", "use": "accept", "gloss": { "en": "to split", "ru": "делить" } }
+  ],
+  "to-carry-out": [
+    { "id": "do", "use": "accept", "concept": "to-do" }
+  ],
+  "to-suppose": [
+    { "id": "assume", "use": "accept", "gloss": { "en": "to assume" } }
+  ],
+  "to-achieve": [
+    { "id": "reach", "use": "weave", "gloss": { "en": "to reach", "ru": "дотянуться", "uz": "yetib olmoq" } },
+    { "id": "catch-up", "use": "accept", "gloss": { "en": "to catch up", "ru": "догонять", "uz": "quvib yetmoq" } }
+  ],
+  "to-touch": [
+    { "id": "play-music", "use": "weave", "gloss": { "en": "to play music", "uz": "chalmoq", "ru": "играть (на инструменте)" } },
+    { "id": "ring", "use": "weave", "gloss": { "en": "to ring", "ru": "звонить", "uz": "jiringlamoq" } }
+  ],
+  "to-recognize": [
+    { "id": "admit", "use": "weave", "gloss": { "en": "to admit" } }
+  ],
+  "rich": [
+    { "id": "tasty", "use": "weave", "gloss": { "en": "tasty", "ru": "вкусный", "uz": "mazali" } }
+  ],
+  "white": [
+    { "id": "blank", "use": "accept", "gloss": { "en": "blank" } }
+  ],
+  "green": [
+    { "id": "unripe", "use": "accept", "gloss": { "en": "unripe", "ru": "неспелый", "uz": "pishmagan" } }
+  ],
+  "same": [
+    { "id": "even", "use": "weave", "gloss": { "en": "even", "ru": "даже", "uz": "hatto" } },
+    { "id": "really", "use": "weave", "gloss": { "en": "really", "ru": "действительно", "uz": "haqiqatan" } }
+  ],
+  "outside": [
+    { "id": "out", "use": "accept", "gloss": { "en": "out", "ru": "наружу", "uz": "tashqariga" } }
+  ],
+  "early": [
+    { "id": "soon", "use": "accept", "concept": "soon" }
+  ]
+}

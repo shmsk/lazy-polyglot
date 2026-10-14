@@ -3,7 +3,7 @@ import { createInterface } from "node:readline/promises";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { initConfig, loadConfig, saveConfig, loadState, saveState, loadWordlist, readJson, loadGrammar, loadPatterns, loadNumberRules, falseFriendsFor, availableLangs, userLangs, wordlistPath, wordlistLayers, normalizeLang, baseLang, langsWithState, sharedWithBase, changelogFor, loadHomographs, PLUGIN_VERSION, DATA_DIR, CONCEPTS_PATH, USER_WORDLISTS_DIR } from "./store.ts";
+import { initConfig, loadConfig, saveConfig, loadState, saveState, loadWordlist, readJson, loadGrammar, loadPatterns, loadNumberRules, falseFriendsFor, availableLangs, userLangs, wordlistPath, wordlistLayers, normalizeLang, baseLang, langsWithState, sharedWithBase, changelogFor, loadHomographs, logSenseReview, clashesElsewhere, PLUGIN_VERSION, DATA_DIR, CONCEPTS_PATH, USER_WORDLISTS_DIR } from "./store.ts";
 import { runValidation } from "./validate.ts";
 import { langName } from "./instruction.ts";
 import { invocationKey, isDuplicateInvocation } from "./guard.ts";
@@ -17,10 +17,10 @@ import { buildInstruction } from "./instruction.ts";
 import { readingOf, readingFor, askReadingLine, readingExamples, READING_MODES, type ReadingMode } from "./reading.ts";
 import { promptGlossLang, askNativeLine, GLOSS_LANGS } from "./glossLang.ts";
 import { scanRecalls, recordRecalls, applyQuizResult, checkAnswer } from "./recall.ts";
-import { placementQueue, answerPlacement, skippedFor, withSkipped, placementStarted, detectTooEasy, OFFER_TOO_EASY, OFFER_KNOWN_MAX, offerAtStart } from "./placement.ts";
+import { placementQueue, answerPlacement, withAlso, skippedFor, withSkipped, placementStarted, detectTooEasy, OFFER_TOO_EASY, OFFER_KNOWN_MAX, offerAtStart } from "./placement.ts";
 import { acceptCard, answerCard, cardQueue, cardStatus, revealCard } from "./cards.ts";
 import type { CardUndo } from "./cards.ts";
-import { algorithmOf, glossFor, grammarStage, isAbsorbed, isWordKey, wordsPerResponse, type Config } from "./types.ts";
+import { algorithmOf, glossFor, senseGloss, shownSenses, grammarStage, isAbsorbed, isWordKey, wordsPerResponse, type Config } from "./types.ts";
 import type { Word, WordState } from "./types.ts";
 import { pickSpinnerWords, tipFor, applySpinnerTips, removeSpinnerTips, countOurTips, readSettings, writeSettingsIfChanged, claudeSettingsPath } from "./spinner.ts";
 import { exportBundle, importBundle, parseBundle, formatImportReport, formatExportSummary } from "./transfer.ts";
@@ -69,6 +69,9 @@ function makeInstruction(mark: boolean, sessionId = "", eventName = "", prompt =
     const stale = mark ? staleServed(DATA_DIR, sessionId) : null;
     if (stale && stale.lang === config.lang) settleServed(state, stale, null, now); // host with no after-reply event
     ({ picks, known } = pickLadder(unlockedWords(words, state), state, n, now));
+    // carta here, carta = letter in the other language the learner studies: the new word says so
+    const clashes = clashesElsewhere(config.lang, picks.map((p) => p.word), config.native);
+    if (clashes.size) picks = picks.map((p) => (clashes.has(p.word.id) ? { ...p, word: { ...p.word, elsewhere: clashes.get(p.word.id)! } } : p));
   } else {
     picks = pickWords(unlockedWords(words, state), state, n);
   }
@@ -689,15 +692,35 @@ try {
         for (const p of pairs) {
           const at = p.indexOf("=");
           const target = p.slice(0, at).trim().toLowerCase();
-          const w = queue.get(target);
+          // "bambino=baby!sense": the agent vouches the answer is a real meaning the data lacks.
+          // It comes after the miss, so the word may already be on the skip list: look it up there too.
+          const raw = p.slice(at + 1);
+          const vouched = /!sense\s*$/.test(raw);
+          const answer = raw.replace(/!sense\s*$/, "").trim();
+          const w = queue.get(target) ?? (vouched ? words.find((x) => x.target.toLowerCase() === target && skipped.includes(x.id)) : undefined);
           if (!w) {
             lines.push(`  · ${target}: not in the placement queue (already placed or not in the list), skipped`);
             continue;
           }
           queue.delete(target);
-          const { ok } = answerPlacement(words, state, skipped, w, p.slice(at + 1), lang, now());
+          let { ok, sense } = answerPlacement(words, state, skipped, w, answer, lang, now());
+          if (!ok && vouched && answer) {
+            const i = skipped.indexOf(w.id);
+            if (i >= 0) skipped.splice(i, 1);
+            ({ ok } = answerPlacement(words, state, skipped, w, gloss(w), lang, now()));
+            logSenseReview({ at: now(), lang, id: w.id, lemma: w.target, answer, via: "placement" });
+            right++;
+            lines.push(`  ✓ ${w.target}: "${answer}" accepted as a meaning (logged for the dictionary); main meaning ${gloss(w)}`);
+            continue;
+          }
           if (ok) right++;
-          lines.push(ok ? `  ✓ ${w.target}` : `  ✗ ${w.target} = ${gloss(w)}, stays new`);
+          lines.push(
+            !ok
+              ? `  ✗ ${w.target} = ${gloss(w)}, stays new`
+              : sense
+                ? `  ✓ ${w.target}: ${senseGloss(sense, config.native, lang)} is right too; main meaning ${gloss(w)}${shownSenses(w, config.native, lang, sense).length ? ` (also: ${shownSenses(w, config.native, lang, sense).map((x) => x.gloss).join(", ")})` : ""}`
+                : `  ✓ ${withAlso(w, config.native, lang)}`,
+          );
         }
         save();
         console.log(`${lines.join("\n")}\nKnown this round: ${right}. ${summary()}.`);
@@ -725,10 +748,10 @@ try {
         if (line.done) break; // input closed (Ctrl-D): everything answered so far is saved
         const answer = String(line.value);
         if (answer.trim().toLowerCase() === "q") break;
-        const { ok } = answerPlacement(words, state, skipped, w, answer, lang, now());
+        const { ok, sense } = answerPlacement(words, state, skipped, w, answer, lang, now());
         asked++;
         if (ok) right++;
-        console.log(ok ? "  ✓ known" : `  ✗ ${w.target} = ${gloss(w)}`);
+        console.log(!ok ? `  ✗ ${w.target} = ${gloss(w)}` : sense ? `  ✓ known (main meaning: ${gloss(w)})` : "  ✓ known");
         save();
       }
       rl.close();

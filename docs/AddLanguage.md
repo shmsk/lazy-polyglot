@@ -139,6 +139,28 @@ A reply counts a word only when it shows up in bold, and a verb is matched by it
 - Only verbs in your wordlist; `bun test` checks every key.
 - A regional variant inherits its base's file; for yourself, the file goes in `~/.lazy-polyglot/irregular/<code>.json`.
 
+## Step 4f (optional) — `data/senses/<code>.json`
+
+A wordlist gives each word one meaning, from its concept. Most words have more: Italian *carta* is paper, but also a map and a menu. List a word's other meanings so a learner who answers "map" is marked right, and so replies can use them once the main one is familiar. Keyed by concept id:
+
+```json
+{
+  "paper": [
+    { "id": "map", "use": "weave", "gloss": { "en": "map", "ru": "карта", "uz": "xarita" } },
+    { "id": "menu", "use": "weave", "gloss": { "en": "menu", "ru": "меню", "uz": "menyu" } },
+    { "id": "playing-card", "use": "accept", "gloss": { "en": "card", "ru": "карта (игральная)", "uz": "karta" } }
+  ],
+  "hour": [{ "id": "now", "use": "accept", "concept": "now" }]
+}
+```
+
+- **`weave`**: an everyday meaning a learner meets in normal text. At most 2 per word. Shown next to the main meaning and woven once that is familiar.
+- **`accept`**: a fair answer not worth teaching (a near-synonym, a rarer meaning). Graded right, never shown.
+- **`concept`**: the meaning is another listed concept (Italian *ora* also means "now", which *adesso* teaches). No gloss needed; always `accept`. The validator tells you when a gloss collides with another concept.
+- Glosses are short (1–3 words), in your own words, in the native languages the concepts have (`en`, `ru`, `uz`), never in the language itself. Leave a key out where that language uses one word for both meanings (Russian *язык* is language and tongue): a learner with no gloss in their language never sees the sense, which is right, because for them it is the same word. Leave out inflected forms, archaic, slang and vulgar meanings, and figurative uses that translate the same way.
+- Be selective: most words get nothing. `scripts/sense-candidates.ts <code> <dir>` pulls candidate meanings from Wiktionary as raw material; don't copy its text (CC BY-SA).
+- A regional variant inherits its base's file, except for the words it spells differently; give those their own entries in `data/senses/<variant>.json`. An entry there replaces the base's for that word, so a meaning that doesn't hold in the region goes too: Spanish *piso* = apartment is Spain only, and `es-419.json` lists piso without it (`[]` drops them all). For yourself, the file goes in `~/.lazy-polyglot/senses/<code>.json`.
+
 ## Step 5 — Validate
 
 All three must pass; paste their output into your PR description:

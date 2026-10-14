@@ -1,8 +1,8 @@
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chmodSync, mkdirSync, readFileSync, writeFileSync, renameSync, existsSync, readdirSync, realpathSync, statSync } from "node:fs";
-import type { Concept, Config, FalseFriend, State, Word, WordMapping, WordState } from "./types.ts";
+import { appendFileSync, chmodSync, mkdirSync, readFileSync, writeFileSync, renameSync, existsSync, readdirSync, realpathSync, statSync } from "node:fs";
+import type { Concept, Config, FalseFriend, Sense, SenseFile, State, Word, WordMapping, WordState } from "./types.ts";
 import { grammarKey, type GrammarItem } from "./grammar.ts";
 import { patternKey, type Pattern } from "./patterns.ts";
 import { numberKey, type NumberRule } from "./numbers.ts";
@@ -175,6 +175,10 @@ const READINGS_DIR = join(BUNDLED, "readings");
 const USER_READINGS_DIR = join(DATA_DIR, "readings");
 const IRREGULAR_DIR = join(BUNDLED, "irregular");
 const USER_IRREGULAR_DIR = join(DATA_DIR, "irregular");
+export const SENSES_DIR = join(BUNDLED, "senses");
+const USER_SENSES_DIR = join(DATA_DIR, "senses");
+/** Answers an agent accepted as a real meaning the senses file lacks (bambino=baby!sense): raw material for the data. */
+export const SENSES_REVIEW_PATH = join(DATA_DIR, "senses-review.jsonl");
 export const CONCEPTS_PATH = join(BUNDLED, "concepts.json");
 export const HOMOGRAPHS_PATH = join(BUNDLED, "homographs.json");
 const CHANGELOG_PATH = join(REPO_ROOT, "CHANGELOG.md");
@@ -306,6 +310,32 @@ export function loadIrregular(lang: string): Record<string, string[]> {
   return { ...(base ? irregularFile(base) : {}), ...irregularFile(lang) };
 }
 
+/** Other meanings (concept id → senses) for exactly this code; {} when there is no file. */
+function sensesFile(lang: string): SenseFile {
+  const path = resolveData(USER_SENSES_DIR, SENSES_DIR, lang);
+  return path ? readJson<SenseFile>(path, `senses ${lang}`) : {};
+}
+
+/**
+ * Other meanings of each word, by concept id. A variant's file overlays its base's by id, but
+ * a base entry describes the base's lemma: where the variant spells the word differently
+ * (es-419 carro for es coche) and has no entry of its own, the base senses are dropped.
+ * A sense that names a listed concept takes that concept's gloss when it has none of its own.
+ */
+export function loadSenses(lang: string, concepts: Map<string, Concept> = new Map(loadConcepts().map((c) => [c.id, c]))): Record<string, Sense[]> {
+  const base = baseLang(normalizeLang(lang));
+  const out: Record<string, Sense[]> = {};
+  if (base) {
+    const overlay = wordlistPath(lang);
+    const respelled = overlay ? readJson<WordMapping>(overlay, `wordlist ${lang}`) : {};
+    for (const [id, list] of Object.entries(sensesFile(base))) if (respelled[id] === undefined) out[id] = list;
+  }
+  Object.assign(out, sensesFile(lang));
+  for (const [id, list] of Object.entries(out))
+    out[id] = list.map((s) => (s.gloss || !s.concept || !concepts.has(s.concept) ? s : { ...s, gloss: concepts.get(s.concept)!.gloss }));
+  return out;
+}
+
 /** Concepts joined with their lemmas in the target language, in rank order (most useful first; unranked keep file order, last). */
 export function loadWordlist(lang: string): Word[] {
   const mapping = loadWordMapping(lang);
@@ -319,6 +349,7 @@ export function loadWordlist(lang: string): Word[] {
       .map((f) => [f.target, f.note ?? `vulgar in ${regionName(code)}`]),
   );
   const concepts = new Map(loadConcepts().map((c) => [c.id, c]));
+  const senses = loadSenses(lang, concepts);
   const words: Word[] = [];
   for (const [id, lemma] of Object.entries(mapping)) {
     const c = concepts.get(id);
@@ -327,7 +358,7 @@ export function loadWordlist(lang: string): Word[] {
     const differs = baseTarget !== undefined && baseTarget !== lemma;
     const baseNote = differs ? rude.get(baseTarget) : undefined;
     const ipa = readings[id];
-    words.push({ id, target: lemma, pos: c.pos, tier: c.tier, ...(c.rank !== undefined ? { rank: c.rank } : {}), gloss: c.gloss, ...(c.alt ? { alt: c.alt } : {}), ...(differs ? { baseTarget } : {}), ...(baseNote ? { baseNote } : {}), ...(ipa ? { ipa } : {}) });
+    words.push({ id, target: lemma, pos: c.pos, tier: c.tier, ...(c.rank !== undefined ? { rank: c.rank } : {}), gloss: c.gloss, ...(c.alt ? { alt: c.alt } : {}), ...(differs ? { baseTarget } : {}), ...(baseNote ? { baseNote } : {}), ...(ipa ? { ipa } : {}), ...(senses[id]?.length ? { senses: senses[id] } : {}) });
   }
   // every algorithm and the placement cards take new words in list order, so ranking happens once, here
   return words.sort((a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER));
@@ -431,4 +462,45 @@ export function langsWithState(): string[] {
     .map((f) => /^state\.([a-z]+(?:-[A-Za-z0-9]+)*)\.json$/.exec(f)?.[1])
     .filter((l): l is string => Boolean(l))
     .sort();
+}
+
+/** One answer an agent vouched for as a real meaning (bambino=baby!sense), appended for whoever maintains the senses data. */
+export function logSenseReview(entry: { at: string; lang: string; id: string; lemma: string; answer: string; via: string }): void {
+  try {
+    mkdirSync(DATA_DIR, { recursive: true });
+    appendFileSync(SENSES_REVIEW_PATH, `${JSON.stringify(entry)}\n`);
+  } catch {
+    // the answer is already counted; losing the review line must never fail the command
+  }
+}
+
+/**
+ * Words whose spelling means another concept in a language the learner also studies
+ * (learning it, also es: carta = paper here, letter there). Concept id → "es carta = letter",
+ * in the learner's language. Only the given words are checked; a broken other list is skipped.
+ */
+export function clashesElsewhere(lang: string, words: Word[], native: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const own = baseLang(normalizeLang(lang)) ?? normalizeLang(lang);
+  const others = langsWithState().filter((l) => (baseLang(l) ?? l) !== own);
+  if (!others.length || !words.length) return out;
+  const concepts = new Map(loadConcepts().map((c) => [c.id, c]));
+  for (const other of others) {
+    let mapping: WordMapping;
+    try {
+      mapping = loadWordMapping(other);
+    } catch {
+      continue;
+    }
+    const byLemma = new Map<string, string[]>();
+    for (const [id, lemma] of Object.entries(mapping)) byLemma.set(lemma.toLowerCase(), [...(byLemma.get(lemma.toLowerCase()) ?? []), id]);
+    for (const w of words) {
+      const ids = byLemma.get(w.target.toLowerCase());
+      if (!ids || ids.includes(w.id) || out.has(w.id)) continue;
+      const c = concepts.get(ids[0]!);
+      const g = c?.gloss[native] ?? c?.gloss.en;
+      if (g) out.set(w.id, `${other} ${w.target} = ${g}`);
+    }
+  }
+  return out;
 }

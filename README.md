@@ -226,6 +226,16 @@ When you pass 50, 100, 200, 300 or 400 absorbed words, or the whole core, the ag
 - `status` shows the way to the next one: `Next milestone: ▓▓▓░░ 87/100`.
 - `/lazy-polyglot:milestones off` turns them off, bar included.
 
+## Words with several meanings
+
+Italian *carta* is paper, but also a map and a menu; Spanish *tiempo* is time and weather. In Spanish, Italian, Portuguese and English (all their regional versions) each word lists its everyday other meanings, in `data/senses/<lang>.json`.
+
+- Placement, `/cards` and `quiz` accept any of them and say which one you gave: `✓ carta: map is right too; main meaning paper (also: menu)`.
+- A new word comes with its main meaning only. Once that is familiar, the agent may use the word in a second meaning where the reply needs it, always translated (**carta** (here: menu)), and never in two meanings in one reply.
+- A [topic](#topics-words-for-a-trip-or-an-exam) can ask for a meaning up front: a trip topic teaches *carta* as the menu.
+- Learning two languages where one spelling means different things (Italian *carta* = paper, Spanish *carta* = letter)? The new word says so once.
+- German, French and Turkish keep one meaning per word for now.
+
 ## Supported languages
 
 | Language | Code | Words | Grammar constructions | Word-building rules | Number rules | Pronunciation |

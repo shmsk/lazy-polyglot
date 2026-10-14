@@ -1,0 +1,22 @@
+{
+  "face": [
+    { "id": "guy", "use": "accept", "gloss": { "en": "guy", "ru": "парень", "uz": "yigit" } }
+  ],
+  "dog": [
+    { "id": "puppy", "use": "accept", "gloss": { "en": "puppy", "ru": "щенок", "uz": "kuchukcha" } }
+  ],
+  "phone": [
+    { "id": "cell-phone", "use": "accept", "gloss": { "en": "cell phone", "ru": "сотовый телефон", "uz": "uyali aloqa" } }
+  ],
+  "to-take": [
+    { "id": "catch", "use": "weave", "gloss": { "en": "to catch", "ru": "ловить", "uz": "ushlamoq" } },
+    { "id": "pick", "use": "weave", "gloss": { "en": "to pick up", "ru": "забирать", "uz": "olib ketmoq" } },
+    { "id": "grab", "use": "accept", "gloss": { "en": "to grab", "ru": "хватать", "uz": "changallamoq" } }
+  ],
+  "to-put": [
+    { "id": "set", "use": "accept", "gloss": { "en": "to set", "ru": "устанавливать", "uz": "o'rnatmoq" } }
+  ],
+  "to-understand": [
+    { "id": "get", "use": "accept", "gloss": { "en": "to get", "ru": "схватывать", "uz": "tushunib olmoq" } }
+  ]
+}

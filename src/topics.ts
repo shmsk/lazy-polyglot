@@ -22,6 +22,8 @@ export interface TopicEntry {
   gloss: Record<string, string>;
   /** Links the entry to a core concept: the core word and its progress are reused, nothing is duplicated */
   conceptId?: string;
+  /** With conceptId: one of that word's other meanings (data/senses), woven in that meaning from the start (carta = menu for a trip) */
+  sense?: string;
   /** Set by the pace check: doesn't fit before the deadline, taught only after the rest */
   waiting?: boolean;
 }
@@ -63,6 +65,7 @@ export const PHRASE_MAX = 40;
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,40}$/;
 const KEY = /^[a-z0-9_]{1,40}$/;
+const KEY_SENSE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const POS = new Set<Pos>(["noun", "verb", "adj", "adv", "num"]);
 
@@ -154,6 +157,7 @@ export function validateTopic(topic: Topic, lang: string, coreIds: Set<string> =
       else if (concepts.has(e.conceptId)) errors.push(`${at}: conceptId "${e.conceptId}" is used twice`);
       else concepts.add(e.conceptId);
     }
+    if (e.sense !== undefined && (typeof e.sense !== "string" || !KEY_SENSE.test(e.sense) || e.conceptId === undefined)) errors.push(`${at}: sense must be a sense id of the word its conceptId names`);
   });
   return errors;
 }
@@ -178,7 +182,8 @@ export function mergeTopics(core: Word[], topics: TopicFile[], state: State = {}
       if (base) {
         if (marked.has(base.id)) continue;
         marked.add(base.id);
-        lead.push({ ...base, topic: slug });
+        const focus = e.sense && base.senses?.some((s) => s.id === e.sense) ? e.sense : undefined;
+        lead.push({ ...base, topic: slug, ...(focus ? { focus } : {}) });
         continue;
       }
       lead.push({

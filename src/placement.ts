@@ -1,6 +1,6 @@
-import type { Config, State, Word } from "./types.ts";
-import { ABSORBED_STEP, LADDER_MS, isAbsorbed } from "./types.ts";
-import { checkAnswer } from "./recall.ts";
+import type { Config, Sense, State, Word } from "./types.ts";
+import { ABSORBED_STEP, LADDER_MS, isAbsorbed, shownSenses } from "./types.ts";
+import { answerMatch } from "./recall.ts";
 
 /**
  * Placement test: a learner who already knows part of the list proves it once, and
@@ -41,6 +41,8 @@ export function markKnown(state: State, id: string, now: string): State {
 export interface PlacementAnswer {
   word: Word;
   ok: boolean;
+  /** Set when the answer named another meaning of the word (carta → map), not its main one. */
+  sense?: Sense;
 }
 
 /**
@@ -50,10 +52,17 @@ export interface PlacementAnswer {
  */
 export function answerPlacement(words: Word[], state: State, skipped: string[], word: Word, answer: string, lang: string, now: string): PlacementAnswer {
   const siblings = words.filter((x) => x.target === word.target);
-  const matched = siblings.filter((x) => checkAnswer(answer, x, lang));
-  if (matched.length) for (const x of matched) markKnown(state, x.id, now);
+  const hits = siblings.map((x) => ({ x, m: answerMatch(answer, x, lang) })).filter((h) => h.m !== null);
+  if (hits.length) for (const { x } of hits) markKnown(state, x.id, now);
   else for (const x of siblings) if (!skipped.includes(x.id)) skipped.push(x.id);
-  return { word, ok: matched.length > 0 };
+  const sense = hits.every((h) => h.m !== "main") ? (hits[0]?.m as Sense | undefined) : undefined;
+  return { word, ok: hits.length > 0, ...(sense ? { sense } : {}) };
+}
+
+/** "carta (also: map, menu)": the word with its everyday other meanings, for a ✓ line; just the word when it has none. */
+export function withAlso(word: Word, native: string, lang: string, except?: Sense): string {
+  const also = shownSenses(word, native, lang, except).map((x) => x.gloss);
+  return also.length ? `${word.target} (also: ${also.join(", ")})` : word.target;
 }
 
 export const skippedFor = (config: Config, lang: string): string[] => [...(config.placementSkipped?.[lang] ?? [])];

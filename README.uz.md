@@ -231,6 +231,16 @@ Agent mavzuni qanday tuzishi: [docs/Topics.md](docs/Topics.md) (ingliz tilida).
 - `status` keyingisigacha yoʻlni koʻrsatadi: `Next milestone: ▓▓▓░░ 87/100`.
 - `/lazy-polyglot:milestones off` ularni chiziq bilan birga oʻchiradi.
 
+## Bir nechta maʼnoli soʻzlar
+
+Italyancha *carta* — qogʻoz, lekin xarita va menyu hamdir; ispancha *tiempo* ham vaqt, ham ob-havo. Ispan, italyan, portugal va ingliz tillarida (barcha mintaqaviy variantlarida) har bir soʻzning kundalik boshqa maʼnolari `data/senses/<lang>.json` faylida yozilgan.
+
+- Placement, `/cards` va `quiz` ularning istalganini qabul qiladi va qaysi birini aytganingizni koʻrsatadi: `✓ carta: map is right too; main meaning paper (also: menu)`.
+- Yangi soʻz faqat asosiy maʼnosi bilan keladi. U tanish boʻlgach, agent soʻzni javobga kerak boʻlgan joyda ikkinchi maʼnoda ishlatishi mumkin, har doim tarjima bilan (**carta** (bu yerda: menyu)), va bitta javobda hech qachon ikki maʼnoda emas.
+- Mavzu maʼnoni oldindan soʻrashi mumkin: sayohat mavzusi *carta* ni menyu sifatida oʻrgatadi.
+- Bir xil yozilish turli maʼno beradigan ikki tilni oʻrganyapsizmi (italyancha *carta* = qogʻoz, ispancha *carta* = xat)? Yangi soʻz buni bir marta aytadi.
+- Nemis, fransuz va turk tillarida hozircha har bir soʻzning bitta maʼnosi bor.
+
 ## Qoʻllab-quvvatlanadigan tillar
 
 | Til | Kod | Soʻzlar | Grammatik qurilmalar | Soʻz yasash qoidalari | Son qoidalari | Talaffuz |

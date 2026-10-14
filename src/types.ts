@@ -44,6 +44,12 @@ export interface Word {
   baseNote?: string;
   /** Pronunciation as IPA, from data/readings/<lang>.json; absent for languages that read as written. */
   ipa?: string;
+  /** Other meanings of this lemma in this language (it carta: map, menu), from data/senses/<lang>.json. */
+  senses?: Sense[];
+  /** A topic asked for one of the senses (trip → carta = menu): replies weave the word in that meaning. */
+  focus?: string;
+  /** The same spelling means another concept in a language the learner also studies (es carta = letter). */
+  elsewhere?: string;
   /** Slug of the running topic this word belongs to: topic words lead the queue (src/topics.ts). */
   topic?: string;
   /** A topic phrase ("la cuenta, por favor"): taught whole, never counted toward grammar unlocks. */
@@ -55,6 +61,49 @@ export interface Word {
  * or it is rude somewhere (vulgar). Vulgar entries are never teaching content; they only
  * warn and guard the data. Lives in data/falseFriends/<lang>.json, keyed by the word's language.
  */
+/**
+ * One more meaning of a word in one language: Italian carta is paper (its concept) but also
+ * map and menu. Lives in data/senses/<lang>.json as concept id → Sense[]; the concept stays
+ * the unit of progress, so a sense never gets its own card or state.
+ */
+export interface Sense {
+  /** Stable within the word, kebab-case: a topic names a sense by it (paper.menu). */
+  id: string;
+  /** weave: an everyday meaning, shown and woven once the main one is familiar. accept: only graded as right. */
+  use: "weave" | "accept";
+  /** By native-language code. Optional when `concept` is set: that concept's gloss is used. */
+  gloss?: Record<string, string>;
+  /** The meaning is this listed concept (it ora → now, which adesso teaches); its progress is never touched. */
+  concept?: string;
+}
+
+export type SenseFile = Record<string, Sense[]>;
+
+/** The sense's gloss in the learner's language, like glossFor (never the target language itself). */
+export function senseGloss(s: Sense, native: string, lang?: string): string {
+  const g = s.gloss ?? {};
+  const own = lang?.split("-")[0];
+  const key = [native, "en", ...Object.keys(g)].find((k) => k !== own && g[k] !== undefined);
+  return key ? g[key]! : s.id;
+}
+
+/** Weave senses only: the everyday other meanings. */
+export const weaveSenses = (w: Word): Sense[] => (w.senses ?? []).filter((s) => s.use === "weave");
+
+/**
+ * The weave senses a learner is shown, as glosses in their language. A sense with no gloss in
+ * that language is left out: Russian язык is both language and tongue, so for a Russian
+ * speaker lingua = tongue is not another meaning. A learner whose language the word's own
+ * glosses lack (no ru, no uz) falls back to English, like glossFor.
+ */
+export function shownSenses(w: Word, native: string, lang?: string, except?: Sense): { sense: Sense; gloss: string }[] {
+  const own = lang?.split("-")[0];
+  const key = w.gloss[native] !== undefined && native !== own ? native : null;
+  return weaveSenses(w)
+    .filter((s) => s !== except && (key === null || s.gloss?.[key] !== undefined))
+    .map((s) => ({ sense: s, gloss: senseGloss(s, native, lang) }));
+}
+
 export interface FalseFriend {
   target: string;
   /** What it really means, by native-language code ({ en, ru, uz }); a plain string (files before 0.8.0) reads as one meaning for everyone */

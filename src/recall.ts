@@ -1,4 +1,4 @@
-import type { State, Word } from "./types.ts";
+import type { Sense, State, Word } from "./types.ts";
 import { QUIZ_FAIL_EXPOSURES } from "./types.ts";
 import { climb, reset } from "./ladder.ts";
 
@@ -78,14 +78,30 @@ export const normAnswer = (s: string) =>
  * language counts except the target's own (learning en, "house" is not a translation of "house").
  */
 export function checkAnswer(answer: string, word: Word, lang?: string): boolean {
-  const a = normAnswer(answer);
-  if (!a) return false;
-  const own = lang?.split("-")[0];
-  const glosses = Object.entries(word.gloss)
+  return answerMatch(answer, word, lang) !== null;
+}
+
+/** Every gloss variant of a record except the target language's own, normalized like an answer. */
+const glossVariants = (gloss: Record<string, string>, own: string | undefined): string[] =>
+  Object.entries(gloss)
     .filter(([k]) => k !== own)
-    .flatMap(([, g]) => g.split(/[,;/()]/));
+    .flatMap(([, g]) => g.split(/[,;/()]/))
+    .map(normAnswer)
+    .filter(Boolean);
+
+/**
+ * Which meaning an answer names: "main" (the concept's gloss or an alt), one of the word's
+ * other senses (carta → map), or null when it names none. A sense is checked only after the
+ * main meaning, so an answer both share counts as the main one.
+ */
+export function answerMatch(answer: string, word: Word, lang?: string): "main" | Sense | null {
+  const a = normAnswer(answer);
+  if (!a) return null;
+  const own = lang?.split("-")[0];
   const alts = Object.entries(word.alt ?? {})
     .filter(([k]) => k !== own)
-    .flatMap(([, list]) => list);
-  return [...glosses, ...alts].map(normAnswer).filter(Boolean).includes(a);
+    .flatMap(([, list]) => list)
+    .map(normAnswer);
+  if ([...glossVariants(word.gloss, own), ...alts].includes(a)) return "main";
+  return (word.senses ?? []).find((s) => s.gloss && glossVariants(s.gloss, own).includes(a)) ?? null;
 }

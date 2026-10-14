@@ -1,0 +1,27 @@
+{
+  "shop": [
+    { "id": "workshop", "use": "accept", "gloss": { "ru": "мастерская", "uz": "ustaxona" } },
+    { "id": "go-shopping", "use": "weave", "gloss": { "ru": "делать покупки", "uz": "xarid qilmoq" } }
+  ],
+  "color": [
+    { "id": "to-colour", "use": "accept", "gloss": { "ru": "красить", "uz": "bo'yamoq" } }
+  ],
+  "center": [
+    { "id": "middle", "use": "accept", "concept": "middle" }
+  ],
+  "to-comprehend": [
+    { "id": "to-understand", "use": "accept", "concept": "to-understand" },
+    { "id": "to-carry-out", "use": "accept", "concept": "to-carry-out" }
+  ],
+  "line": [
+    { "id": "text-line", "use": "weave", "gloss": { "ru": "строка", "uz": "satr" } }
+  ],
+  "movie": [
+    { "id": "reel", "use": "accept", "gloss": { "ru": "плёнка", "uz": "plyonka" } },
+    { "id": "to-film", "use": "weave", "gloss": { "ru": "снимать", "uz": "suratga olmoq" } },
+    { "id": "cinema", "use": "accept", "gloss": { "ru": "кино", "uz": "kino" } }
+  ],
+  "to-reckon": [
+    { "id": "to-count", "use": "accept", "concept": "to-count" }
+  ]
+}

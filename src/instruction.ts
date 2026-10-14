@@ -1,5 +1,5 @@
 import type { Config, Word } from "./types.ts";
-import { glossFor, grammarStage, wordsPerResponse, INLINE_GLOSS_MAX_STEP, GLOSSARY_MAX_STEP } from "./types.ts";
+import { glossFor, grammarStage, senseGloss, shownSenses, wordsPerResponse, INLINE_GLOSS_MAX_STEP, GLOSSARY_MAX_STEP } from "./types.ts";
 import type { Pick } from "./scheduler.ts";
 import type { GrammarItem } from "./grammar.ts";
 import type { PatternCue } from "./patterns.ts";
@@ -51,7 +51,12 @@ export function buildInstruction(config: Config, picks: Pick[], grammar: Grammar
   const region = BASE_REGION[base] ?? langName(base);
   const contrast = (target: string | undefined, note: string | undefined) =>
     target ? `, ${region}: ${target}${note ? ` (${note})` : ""}` : "";
-  const item = (p: Pick) => `${p.word.target} = ${glossFor(p.word, config.native, config.lang)}${contrast(p.word.baseTarget, p.word.baseNote)}`;
+  // a topic that asked for one sense (trip → carta = menu) shows that meaning as the word's gloss
+  const meaning = (w: Word) => {
+    const f = w.focus ? w.senses?.find((x) => x.id === w.focus) : undefined;
+    return f ? senseGloss(f, config.native, config.lang) : glossFor(w, config.native, config.lang);
+  };
+  const item = (p: Pick) => `${p.word.target} = ${meaning(p.word)}${contrast(p.word.baseTarget, p.word.baseNote)}`;
   const spoken = (p: Pick) => {
     const r = reading(p.word);
     return r ? item(p).replace(` = `, ` [${r}] = `) : item(p);
@@ -128,11 +133,17 @@ function ladderInstruction(config: Config, picks: Pick[], grammar: GrammarItem |
   const stage = grammarStage(config.level);
   const grammarContrast = grammar?.baseExample ? `; ${region}: ${grammar.baseExample}` : "";
 
+  // familiar words carry their everyday other meanings; new ones only a clash with another language the user learns
+  const also = (p: Pick) => (p.word.focus ? [] : shownSenses(p.word, config.native, config.lang).map((x) => x.gloss));
+  const familiarItem = (p: Pick) => (also(p).length ? `${item(p)} (also ${also(p).join(", ")})` : item(p));
+  const freshItem = (p: Pick) => (p.word.elsewhere ? `${spoken(p)} (≠ ${p.word.elsewhere})` : spoken(p));
+  const withAlso = familiar.some((p) => also(p).length > 0);
+  const withElsewhere = fresh.some((p) => p.word.elsewhere);
   const head = [
     `<lazy-polyglot>`,
     `Language immersion (diglot weave): in your reply's prose, use up to ~${picks.length} ${name} words for common ones, ONLY from those below.`,
-    ...(fresh.length ? [`New, translation inline: ${fresh.map(spoken).join("; ")}`] : []),
-    ...(familiar.length ? [`Familiar, no translation in the text: ${familiar.map(item).join("; ")}`] : []),
+    ...(fresh.length ? [`New, translation inline: ${fresh.map(freshItem).join("; ")}`] : []),
+    ...(familiar.length ? [`Familiar, no translation in the text: ${familiar.map(familiarItem).join("; ")}`] : []),
   ];
   const knownAt = head.length; // the known line goes here, filled last to fit the budget
   const lines = [
@@ -144,6 +155,8 @@ function ladderInstruction(config: Config, picks: Pick[], grammar: GrammarItem |
     [...fresh, ...nudge].some((p) => reading(p.word))
       ? `Format: bold every woven word. New and nudge words: **word** [pronunciation] (translation) the first time, pronunciation copied as given; others: just **word**.`
       : `Format: bold every woven word. New and nudge words: **word** (translation) the first time; others: just **word**.`,
+    ...(withAlso ? [`An "also" meaning only where needed, glossed every time: **word** (here: meaning). One meaning per word per reply.`] : []),
+    ...(withElsewhere ? [`A word marked ≠ means something else in another language the user learns: say so once in its translation.`] : []),
     ...(familiar.length ? [`If you used familiar words, close with one line of only those used: ${familiar[0] ? item(familiar[0]) : ""} · …; none used, no line.`] : []),
     `Inflect words to fit, keeping the lemma recognizable.`,
   ];

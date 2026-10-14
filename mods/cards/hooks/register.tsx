@@ -275,6 +275,8 @@ export const register: Register = on => {
         return (
           <Box flexDirection="column" gap={1}>
             {face}
+            {last.meant && <Text dimColor>Right: {last.meant} is another meaning of this word.</Text>}
+            {last.also && <Text dimColor>Also means: {last.also.join(', ')}</Text>}
             {last.known && card.kind === 'placement' && <Text dimColor>Marked known: it skips the new-word stage.</Text>}
             <Box flexDirection="row" gap={1}>
               <Button key="next" variant="primary" autoFocus onPress={() => void advance($)}>
@@ -377,6 +379,8 @@ export const register: Register = on => {
           {prompt}
           {answerLine(<Text>{last.ok ? `✓ ${last.expected}` : `✗ ${last.expected}`}</Text>)}
           {!last.ok && v.typed && <Text dimColor>Your answer: {v.typed}</Text>}
+          {last.meant && <Text dimColor>Right: {last.meant} is another meaning of this word.</Text>}
+          {last.also && <Text dimColor>Also means: {last.also.join(', ')}</Text>}
           {last.known && card.kind === 'placement' && <Text dimColor>Marked known: it skips the new-word stage.</Text>}
           <Box flexDirection="row" gap={1}>
             <Button key="next" variant="primary" autoFocus onPress={() => void advance($)}>

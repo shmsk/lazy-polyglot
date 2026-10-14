@@ -8,6 +8,21 @@ after an update. If an update ever needs you to do something, its section starts
 
 ## [Unreleased]
 
+### Added
+- Words with more than one meaning. Italian *carta* is paper, but also a map and a menu;
+  Spanish *tiempo* is time and weather. In Spanish, Italian, Portuguese and English (all their
+  regional versions), placement, `/cards` and `quiz` now accept any listed meaning and say which
+  one you gave: `✓ carta: map is right too; main meaning paper (also: menu)`. Once a word's main
+  meaning is familiar, your agent may use it in an everyday second meaning, always with a
+  translation (**carta** (here: menu)) and only one meaning per word in a reply. A topic can ask
+  for a meaning up front, so a trip topic teaches *carta* as the menu. German, French and Turkish
+  keep one meaning per word for now.
+- Learning two languages where the same word means different things (Italian *carta* = paper,
+  Spanish *carta* = letter): the new word says so once.
+- In `/lazy-polyglot:placement`, when your agent is sure an answer the dictionary lacks is a real
+  meaning (*bambino* = baby), it can count it and log it in `~/.lazy-polyglot/senses-review.jsonl`,
+  so the dictionary can be filled from real answers.
+
 ### Changed
 - `cards-status on` no longer shows a due-card count in the status line, which Claude Code drew
   as a yellow warning row (`⚠ lazy-polyglot: …`). It now shows one word you are learning and how
@@ -22,6 +37,9 @@ after an update. If an update ever needs you to do something, its section starts
   in the README.
 
 ### Fixed
+- *to recognize* (Italian *riconoscere*, Spanish *reconocer*, Portuguese *reconhecer* and the rest)
+  was translated as «признавать» / «tan olmoq» (to admit). It is now «узнавать» / «tanib olmoq»;
+  the old answers still count.
 - A reply that weaves an irregular verb form now counts: **è** or **sono** for *essere*, *went*
   for *to go*, *fue* for *ir*. Before, only forms sharing the infinitive's root matched, so these
   were scored as misses.

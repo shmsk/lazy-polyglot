@@ -19,7 +19,7 @@ export const BUNDLE_FORMAT = "langcouch-export";
 export const BUNDLE_VERSION = 1;
 
 /** The user's own data files next to progress; each folder holds <lang>.json files, topics hold <lang>.<name>.json. */
-const USER_DIRS = ["wordlists", "grammar", "patterns", "falseFriends", "numbers", "readings", "topics"] as const;
+const USER_DIRS = ["wordlists", "grammar", "patterns", "falseFriends", "numbers", "readings", "senses", "topics"] as const;
 type UserDir = (typeof USER_DIRS)[number];
 
 export interface Bundle {
@@ -102,6 +102,7 @@ function validConfig(c: unknown): c is Config {
 /** A user file must have the shape the loaders expect, or it would break the language it overrides. */
 function validUserFile(dir: UserDir, content: unknown, concepts: Set<string>, name = ""): boolean {
   if (dir === "topics") return isObject(content) && validateTopic(content as unknown as Topic, name.split(".")[0]!, concepts).length === 0;
+  if (dir === "senses") return isObject(content) && Object.entries(content).every(([id, list]) => concepts.has(id) && Array.isArray(list) && list.every((x) => isObject(x) && typeof x.id === "string" && (x.use === "weave" || x.use === "accept")));
   if (dir === "wordlists" || dir === "readings") return isObject(content) && Object.entries(content).every(([id, value]) => concepts.has(id) && typeof value === "string" && value.length > 0);
   if (!Array.isArray(content) || !content.every(isObject)) return false;
   return dir === "falseFriends" || content.every((item) => typeof item.id === "string");

@@ -42,6 +42,7 @@ Write a JSON file anywhere (the learner's home folder is fine), named after the 
 - **`key`**: short, `a-z`, `0-9`, `_`, unique in the topic. Never change a key later: progress hangs on it.
 - **`gloss`**: in the learner's language (`native` in `~/.lazy-polyglot/config.json`); add `en` too if it isn't English.
 - **`conceptId`**: if the entry is a core word (check `data/concepts.json` and the language's wordlist), link it. The learner keeps the progress they already have on it, and nothing is taught twice.
+- **`sense`** (with `conceptId`): when the topic needs a core word in another of its meanings, name that meaning's id from `data/senses/<lang>.json`. A trip topic links *carta* as `"conceptId": "paper", "sense": "menu"`, and replies use it as the menu from the start.
 - **`by`** (optional): `YYYY-MM-DD`. **`context`** (optional): the learner's answers from step 1, so the set can be rebuilt or extended later.
 - Use the web only where local usage matters (Catalonia, Argentina vs Madrid), never by default.
 

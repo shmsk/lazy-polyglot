@@ -1,0 +1,29 @@
+{
+  "car": [
+    { "id": "cart", "use": "accept", "gloss": { "en": "cart", "ru": "тележка", "uz": "aravacha" } },
+    { "id": "wagon", "use": "accept", "gloss": { "en": "wagon", "ru": "повозка", "uz": "arava" } }
+  ],
+  "service": [
+    { "id": "toilet", "use": "accept", "gloss": { "en": "toilet", "ru": "туалет", "uz": "hojatxona" } }
+  ],
+  "floor": [
+    { "id": "floor-surface", "use": "accept", "concept": "floor-surface" }
+  ],
+  "room": [
+    { "id": "quarter", "use": "weave", "gloss": { "en": "quarter", "ru": "четверть", "uz": "chorak" } },
+    { "id": "fourth", "use": "accept", "gloss": { "en": "fourth", "ru": "четвёртый", "uz": "to'rtinchi" } }
+  ],
+  "to-return": [
+    { "id": "give-back", "use": "accept", "gloss": { "en": "to give back", "ru": "возвращать", "uz": "qaytarmoq" } }
+  ],
+  "to-take": [
+    { "id": "drink", "use": "accept", "concept": "to-drink" }
+  ],
+  "pretty": [
+    { "id": "cute", "use": "accept", "gloss": { "en": "cute", "ru": "милый", "uz": "yoqimli" } }
+  ],
+  "key": [
+    { "id": "tap", "use": "weave", "gloss": { "en": "tap", "ru": "кран", "uz": "kran" } },
+    { "id": "wrench", "use": "accept", "gloss": { "en": "wrench", "ru": "гаечный ключ", "uz": "gayka kaliti" } }
+  ]
+}

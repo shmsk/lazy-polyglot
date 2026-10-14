@@ -248,7 +248,7 @@
   {"id":"to-explain","pos":"verb","tier":1,"rank":267,"gloss":{"en":"to explain","ru":"объяснять","uz":"tushuntirmoq"}},
   {"id":"to-ask","pos":"verb","tier":1,"rank":143,"gloss":{"en":"to ask","ru":"спрашивать","uz":"so'ramoq"}},
   {"id":"to-touch","pos":"verb","tier":1,"rank":430,"gloss":{"en":"to touch","ru":"трогать","uz":"tegmoq"}},
-  {"id":"to-recognize","pos":"verb","tier":1,"rank":421,"gloss":{"en":"to recognize","ru":"признавать","uz":"tan olmoq"}},
+  {"id":"to-recognize","pos":"verb","tier":1,"rank":421,"gloss":{"en":"to recognize","ru":"узнавать","uz":"tanib olmoq"},"alt":{"ru":["признавать"],"uz":["tan olmoq"]}},
   {"id":"to-study","pos":"verb","tier":1,"rank":350,"gloss":{"en":"to study","ru":"учиться","uz":"o'qimoq"}},
   {"id":"to-try","pos":"verb","tier":1,"rank":156,"gloss":{"en":"to try","ru":"пытаться","uz":"urinmoq"}},
   {"id":"to-use","pos":"verb","tier":1,"rank":191,"gloss":{"en":"to use","ru":"использовать","uz":"foydalanmoq"}},

@@ -27,7 +27,7 @@ export type CardStatus = {
 export type HintLine = { words: { target: string; gloss: string; reading?: string }[]; known: number; total: number; index: number }
 
 /** What an answer came to: the right answer is shown after a hit and a miss alike. */
-export type CardResult = { ok: boolean; expected: string; step: number; due: string; known: boolean; undo?: { state: Record<string, unknown>; skipped: string[] } }
+export type CardResult = { ok: boolean; expected: string; step: number; due: string; known: boolean; undo?: { state: Record<string, unknown>; skipped: string[] }; also?: string[]; meant?: string }
 
 /**
  * The pane's view. `card`: asking; `revealed`: a self-graded card shows its answer

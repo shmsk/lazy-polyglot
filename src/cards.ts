@@ -1,7 +1,7 @@
 import type { Config, State, Word, WordState } from "./types.ts";
-import { glossFor, isAbsorbed } from "./types.ts";
+import { glossFor, isAbsorbed, senseGloss, shownSenses } from "./types.ts";
 import { dueOf, isDue, stepOf } from "./ladder.ts";
-import { applyQuizResult, checkAnswer, dropLeading } from "./recall.ts";
+import { answerMatch, applyQuizResult, dropLeading } from "./recall.ts";
 import { answerPlacement, placementQueue, skippedFor } from "./placement.ts";
 import { readingFor, readingOf } from "./reading.ts";
 import { absorbedCount, milestoneBar } from "./milestones.ts";
@@ -87,6 +87,10 @@ export interface CardResult {
   known: boolean;
   /** On a miss only: what grading changed, so "my answer was right" can take it back (acceptCard). */
   undo?: CardUndo;
+  /** Forward cards: the word's everyday other meanings (carta: map, menu), shown with the answer. */
+  also?: string[];
+  /** The answer named one of those other meanings, not the main one. */
+  meant?: string;
 }
 
 /** The state before a miss: each concept's entry (null = there was none) and the ids the miss put on the skip list. */
@@ -111,8 +115,11 @@ export function answerCard(words: Word[], state: State, config: Config, skipped:
   const before = state[word.id] ? { ...state[word.id]! } : null;
   const skippedBefore = new Set(skipped);
   let ok: boolean;
+  let meant: string | undefined;
   if (card.kind === "placement") {
-    ok = answerPlacement(words, state, skipped, word, answer, lang, now).ok;
+    const placed = answerPlacement(words, state, skipped, word, answer, lang, now);
+    ok = placed.ok;
+    if (placed.sense) meant = senseGloss(placed.sense, config.native, lang);
   } else if (card.dir === "reverse") {
     const same = words.filter((w) => glossFor(w, config.native, lang) === gloss);
     const matched = same.filter((w) => checkReverse(answer, w));
@@ -120,14 +127,17 @@ export function answerCard(words: Word[], state: State, config: Config, skipped:
     if (ok) for (const w of matched) applyQuizResult(state, w.id, true);
     else applyQuizResult(state, word.id, false);
   } else {
-    const matched = words.filter((w) => w.target === word.target && checkAnswer(answer, w, lang));
-    ok = matched.length > 0;
-    if (ok) for (const w of matched) applyQuizResult(state, w.id, true);
+    const hits = words.filter((w) => w.target === word.target).map((w) => ({ w, m: answerMatch(answer, w, lang) })).filter((h) => h.m !== null);
+    ok = hits.length > 0;
+    if (ok) for (const { w } of hits) applyQuizResult(state, w.id, true);
     else applyQuizResult(state, word.id, false);
+    const sense = hits.every((h) => h.m !== "main") ? hits[0]?.m : undefined;
+    if (sense && sense !== "main") meant = senseGloss(sense, config.native, lang);
   }
   const s = state[word.id];
   const undo: CardUndo | undefined = ok ? undefined : { state: { [word.id]: before }, skipped: skipped.filter((id) => !skippedBefore.has(id)) };
-  return { ok, expected: card.dir === "reverse" ? word.target : gloss, step: stepOf(s), due: s ? dueOf(s) : "", known: isAbsorbed(s), ...(undo ? { undo } : {}) };
+  const also = card.dir === "reverse" ? [] : shownSenses(word, config.native, lang).map((x) => x.gloss).filter((g) => g !== meant);
+  return { ok, expected: card.dir === "reverse" ? word.target : gloss, step: stepOf(s), due: s ? dueOf(s) : "", known: isAbsorbed(s), ...(undo ? { undo } : {}), ...(also.length ? { also } : {}), ...(meant ? { meant } : {}) };
 }
 
 /**
