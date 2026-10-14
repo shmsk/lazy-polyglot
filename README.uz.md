@@ -233,13 +233,13 @@ Agent mavzuni qanday tuzishi: [docs/Topics.md](docs/Topics.md) (ingliz tilida).
 
 ## Bir nechta maʼnoli soʻzlar
 
-Italyancha *carta* — qogʻoz, lekin xarita va menyu hamdir; ispancha *tiempo* ham vaqt, ham ob-havo. Ispan, italyan, portugal va ingliz tillarida (barcha mintaqaviy variantlarida) har bir soʻzning kundalik boshqa maʼnolari `data/senses/<lang>.json` faylida yozilgan.
+Italyancha *carta* — qogʻoz, lekin xarita va menyu hamdir; ispancha *tiempo* ham vaqt, ham ob-havo. Barcha oʻrnatilgan tillarda har bir soʻzning kundalik boshqa maʼnolari `data/senses/<lang>.json` faylida yozilgan.
 
 - Placement, `/cards` va `quiz` ularning istalganini qabul qiladi va qaysi birini aytganingizni koʻrsatadi: `✓ carta: map is right too; main meaning paper (also: menu)`.
 - Yangi soʻz faqat asosiy maʼnosi bilan keladi. U tanish boʻlgach, agent soʻzni javobga kerak boʻlgan joyda ikkinchi maʼnoda ishlatishi mumkin, har doim tarjima bilan (**carta** (bu yerda: menyu)), va bitta javobda hech qachon ikki maʼnoda emas.
 - Mavzu maʼnoni oldindan soʻrashi mumkin: sayohat mavzusi *carta* ni menyu sifatida oʻrgatadi.
 - Bir xil yozilish turli maʼno beradigan ikki tilni oʻrganyapsizmi (italyancha *carta* = qogʻoz, ispancha *carta* = xat)? Yangi soʻz buni bir marta aytadi.
-- Nemis, fransuz va turk tillarida hozircha har bir soʻzning bitta maʼnosi bor.
+- Mintaqaviy variant u yerda ishlatilmaydigan maʼnoni olib tashlaydi: ispancha *piso* Ispaniyada kvartira, Lotin Amerikasida esa yoʻq.
 
 ## Qoʻllab-quvvatlanadigan tillar
 
@@ -260,7 +260,7 @@ Kod tilni almashtirish uchun kerak, masalan `/lazy-polyglot:lang es-419` (yoki s
 
 Har bir tayyor roʻyxat ikkinchi model auditidan oʻtgan (uni yozgan modeldan boshqa yetkazib beruvchi). Ingliz fe'llari `to work`, `to love` koʻrinishida keltiriladi: ingliz tilida ot va fe'l koʻpincha bir xil yoziladi, shuning uchun har bir kontseptga oʻz soʻzi kerak. Toʻqish jarayonida ular baribir kontekstga mos ravishda tuslanadi (*worked*, *she loves*).
 
-Tilingizni qoʻshish — bitta JSON fayl bilan. Faqat oʻzingiz uchun: Claude Code ichida `/lazy-polyglot:add-language Georgian` buyrugʻini bajaring, fayl esa `~/.lazy-polyglot/wordlists/` ichiga tushadi va u yerda plagin yangilanishlaridan omon qoladi. Hamma uchun: PR oching, qarang: [docs/AddLanguage.md](docs/AddLanguage.md). Hujjat AI kodlash agenti uni boshidan oxirigacha bajara olishi uchun yozilgan.
+Tilingizni qoʻshish — bitta JSON fayl bilan. Faqat oʻzingiz uchun: Claude Code ichida `/lazy-polyglot:add-language Georgian` buyrugʻini bajaring, fayllar esa `~/.lazy-polyglot/` ichiga tushadi (soʻzlar roʻyxati va eng koʻp ishlatiladiganlarining boshqa maʼnolari) va u yerda plagin yangilanishlaridan omon qoladi. Hamma uchun: PR oching, qarang: [docs/AddLanguage.md](docs/AddLanguage.md). Hujjat AI kodlash agenti uni boshidan oxirigacha bajara olishi uchun yozilgan.
 
 Mintaqaviy variantlar ham xuddi shunday ishlaydi: `pt-BR.json` faqat Braziliya portugal tili `pt`dan farq qiladigan soʻzlarni sanab oʻtadi, qolgani esa asosiy fayldan olinadi. `/lazy-polyglot:add-language Brazilian Portuguese` buyrugʻi shunday variant yaratadi; `/lazy-polyglot:lang pt-br` esa unga oʻtkazadi.
 

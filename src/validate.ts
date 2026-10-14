@@ -215,7 +215,7 @@ export function validateSenses(path: string, mapping: WordMapping, concepts: Map
 }
 
 /** Validate concepts plus each language, printing a report. Returns true when everything passed. */
-export function runValidation(conceptsPath: string, targets: ValidationTarget[], requireFull: boolean): boolean {
+export function runValidation(conceptsPath: string, targets: ValidationTarget[], requireFull: boolean, sensesFor: (wordlistPath: string) => string = sensesPathFor): boolean {
   let failed = false;
   const { concepts, errors: conceptErrors } = validateConcepts(conceptsPath);
   if (conceptErrors.length) {
@@ -237,7 +237,7 @@ export function runValidation(conceptsPath: string, targets: ValidationTarget[],
       // not an error — listed so a reviewer can check each one is a real shared word
       if (shared.length) console.log(`  ${shared.length} shared words: ${shared.join("; ")}`);
     }
-    const sensesPath = sensesPathFor(path);
+    const sensesPath = sensesFor(path);
     if (existsSync(sensesPath)) {
       const merged = Object.assign({}, ...target.map(readMapping)) as WordMapping;
       const { count: n, errors: senseErrors } = validateSenses(sensesPath, merged, concepts, basename(path, ".json"));

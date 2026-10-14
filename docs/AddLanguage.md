@@ -4,14 +4,14 @@ This document is written for an AI coding agent (Claude Code, Codex, etc.) — a
 
 ## What you are building
 
-Lazy Polyglot weaves target-language words into an AI agent's replies. Vocabulary is defined once as a canonical inventory of ~400 language-independent meanings (`data/concepts.json`); each language is a thin file mapping concept ids to that language's words. You will produce **one JSON file**. Three more are optional: grammar constructions, word-building rules and false friends. No code changes: the language name is derived from its ISO code.
+Lazy Polyglot weaves target-language words into an AI agent's replies. Vocabulary is defined once as a canonical inventory of ~400 language-independent meanings (`data/concepts.json`); each language is a thin file mapping concept ids to that language's words. You will produce **one JSON file**, the wordlist (Step 2), with the 30 numerals in it (Step 4c). The rest is optional and each is one more JSON file keyed the same way: grammar constructions, word-building rules and false friends, number rules, pronunciations, irregular verb forms, and the words' other meanings (Steps 4–4f). Other meanings are the one most worth doing: without them a learner who answers *map* for Italian *carta* is marked wrong. No code changes: the language name is derived from its ISO code.
 
 Inputs you need before starting:
 - the ISO 639-1 language code (`tr`, `de`, `fr`, …) — called `<code>` below
 
 ## Two ways to add a language
 
-- **For yourself** (Claude Code plugin users): run `/lazy-polyglot:add-language <language>`, or follow this doc and put the file at `~/.lazy-polyglot/wordlists/<code>.json` (optional files go next to it: `~/.lazy-polyglot/grammar/`, `~/.lazy-polyglot/patterns/`, `~/.lazy-polyglot/falseFriends/`, each as `<code>.json`). It lives next to your progress and survives plugin updates. No clone needed; validate with `lazy-polyglot validate <code> --full` (inside Claude Code: `${CLAUDE_PLUGIN_ROOT}/scripts/cli.sh validate <code> --full`). Never write into the plugin folder (`~/.claude/plugins/cache/…`): it is replaced on every update.
+- **For yourself** (Claude Code plugin users): run `/lazy-polyglot:add-language <language>`, or follow this doc and put the file at `~/.lazy-polyglot/wordlists/<code>.json` (optional files go next to it, each as `<code>.json`: `~/.lazy-polyglot/grammar/`, `patterns/`, `falseFriends/`, `numbers/`, `readings/`, `irregular/`, `senses/`). It lives next to your progress and survives plugin updates. No clone needed; validate with `lazy-polyglot validate <code> --full` (inside Claude Code: `${CLAUDE_PLUGIN_ROOT}/scripts/cli.sh validate <code> --full`). Never write into the plugin folder (`~/.claude/plugins/cache/…`): it is replaced on every update.
 - **For everyone** (a PR): work in a clone of this repo with [bun](https://bun.sh) (`bun install`), put the file at `data/wordlists/<code>.json`, and follow every step below including the PR checklist.
 
 A file in `~/.lazy-polyglot/wordlists/` overrides a bundled one with the same code, so you can also fix a word locally.
@@ -156,14 +156,19 @@ A wordlist gives each word one meaning, from its concept. Most words have more: 
 
 - **`weave`**: an everyday meaning a learner meets in normal text. At most 2 per word. Shown next to the main meaning and woven once that is familiar.
 - **`accept`**: a fair answer not worth teaching (a near-synonym, a rarer meaning). Graded right, never shown.
-- **`concept`**: the meaning is another listed concept (Italian *ora* also means "now", which *adesso* teaches). No gloss needed; always `accept`. The validator tells you when a gloss collides with another concept.
-- Glosses are short (1–3 words), in your own words, in the native languages the concepts have (`en`, `ru`, `uz`), never in the language itself. Leave a key out where that language uses one word for both meanings (Russian *язык* is language and tongue): a learner with no gloss in their language never sees the sense, which is right, because for them it is the same word. Leave out inflected forms, archaic, slang and vulgar meanings, and figurative uses that translate the same way.
-- Be selective: most words get nothing. `scripts/sense-candidates.ts <code> <dir>` pulls candidate meanings from Wiktionary as raw material; don't copy its text (CC BY-SA).
-- A regional variant inherits its base's file, except for the words it spells differently; give those their own entries in `data/senses/<variant>.json`. An entry there replaces the base's for that word, so a meaning that doesn't hold in the region goes too: Spanish *piso* = apartment is Spain only, and `es-419.json` lists piso without it (`[]` drops them all). For yourself, the file goes in `~/.lazy-polyglot/senses/<code>.json`.
+- **`concept`**: the meaning is another listed concept (Italian *ora* also means "now", which *adesso* teaches). No gloss needed; always `accept`. Link only a really different meaning: never two concepts the list keeps apart on purpose (to say / to speak, to begin / to start, to finish / to end, to like / to love, small / little, good / well, middle / center), or the quiz stops telling them apart.
+- **Glosses** are short (1–3 words), in your own words, in the native languages the concepts have (`en`, `ru`, `uz`), never in the language itself. Write the plain everyday word a learner would answer; check every Uzbek gloss (Latin script, plain `'` for oʻ/gʻ) rather than guessing. *Sure* is *amin*, not *ishonchli* (reliable).
+- **Leave a key out** where that native language uses one word for both meanings (Russian *язык* is language and tongue; *машина* is car and machine). A learner with no gloss in their language never sees the sense, which is right: for them it is the same word. Never invent a phrase (*орган речи*) to get around it.
+- **Collisions**: if every key you give is another concept's gloss, the meaning *is* that concept: use `concept`. If only some keys collide (Portuguese *ver* = watch, Russian *смотреть* is also *to look*'s word), the gloss is fine as it is. The validator applies exactly this rule.
+- **Regional meanings** stay out of the base file: a sense one region uses and another doesn't (Spanish *piso* = apartment in Spain only, *llave* = tap in Latin America) belongs in the region's variant file, or nowhere.
+- **Leave out** inflected forms, archaic, slang and vulgar meanings, proper names, and figurative uses that translate the same way (Italian *fare* has dozens; almost none belong here).
+- **Be selective**: most words get nothing. Start from the most frequent words, where a second meaning matters most. `bun scripts/sense-candidates.ts <code> <dir>` (bun only; reads your own wordlist when you have one) pulls candidate meanings from Wiktionary as raw material. Don't copy its text: it is CC BY-SA.
+- **Variants**: a regional variant inherits its base's file, except for the words it spells differently. An entry in `data/senses/<variant>.json` replaces the base's for that word, so a meaning that doesn't hold in the region goes too (`[]` drops them all). Check every inherited weave sense against the region: `es-419.json` lists *piso* without "apartment".
+- **For yourself**, the file goes in `~/.lazy-polyglot/senses/<code>.json`; it also overrides a bundled language's file.
 
 ## Step 5 — Validate
 
-All three must pass; paste their output into your PR description:
+All three must pass; paste their output into your PR description. The validator also checks `data/senses/<code>.json` when there is one (for yourself: the file in `~/.lazy-polyglot/senses/`), and prints `… OK: N senses`:
 
 ```bash
 bun tests/validate-wordlist.ts <code> --full   # every concept covered, shared words listed (for yourself: lazy-polyglot validate <code> --full)
@@ -179,6 +184,10 @@ Have a **different model or vendor** than the one that generated the list review
 
 > You are auditing a beginner-frequency wordlist for {Language} learners. Below are entries `conceptId: word`, each with the concept's English gloss and part of speech. Flag any entry that is: (a) a wrong translation for the glossed sense, (b) wrong part of speech, (c) a rare/unnatural choice where a more common everyday word exists, or (d) not the lemma/citation form. Output ONLY a list of `conceptId: current → suggested (one-line reason)`. Do not rewrite the file, do not comment on correct entries.
 
+For the other meanings (Step 4f), a second prompt:
+
+> You are auditing the other meanings listed for {Language} words. Each entry is `conceptId (word): sense id · weave|accept · glosses`. `weave` senses are shown to learners and used in replies; `accept` ones are only graded right. Flag: (a) a meaning the word does not have, (b) a regional meaning in the base file, (c) anything vulgar or offensive, (d) a `weave` that is not everyday or an everyday meaning left as `accept`, (e) a wrong or unnatural Russian or Uzbek gloss, (f) a `concept` link between near-synonyms, (g) an everyday meaning a beginner would answer that is missing. One line each: `conceptId (word) · sense · problem · exact fix`. Read every `weave` sense.
+
 Apply the fixes you agree with, re-run Step 5, and note in the PR which findings you applied or rejected and why. (Precedent: the Portuguese list went through such an audit; 19 of 24 findings were applied.)
 
 ## Step 7 — Live smoke test
@@ -190,13 +199,13 @@ bun src/cli.ts lang <code>
 bun src/cli.ts instruction
 ```
 
-Expect a `<lazy-polyglot>` block containing `word = gloss` pairs in your language. (The inflection example inside the block — "casas, bonitas" — is currently fixed Spanish wording regardless of language; that's expected.) Unset `LAZY_POLYGLOT_DIR` afterwards.
+Expect a `<lazy-polyglot>` block containing `word = gloss` pairs in your language. If you wrote other meanings, check one is graded right: `bun src/cli.ts placement answer "<word>=<one of its other meanings>"` should print `✓ <word>: … is right too; main meaning …`. (The inflection example inside the block — "casas, bonitas" — is currently fixed Spanish wording regardless of language; that's expected.) Unset `LAZY_POLYGLOT_DIR` afterwards.
 
 ## Step 8 — PR checklist
 
-- [ ] Files touched are exactly: `data/wordlists/<code>.json` and optionally `data/grammar/<code>.json`, `data/patterns/<code>.json`, `data/falseFriends/<code>.json`, `data/numbers/<code>.json`, `data/readings/<code>.json`, `data/irregular/<code>.json`
+- [ ] Files touched are exactly: `data/wordlists/<code>.json` and optionally `data/grammar/<code>.json`, `data/patterns/<code>.json`, `data/falseFriends/<code>.json`, `data/numbers/<code>.json`, `data/readings/<code>.json`, `data/irregular/<code>.json`, `data/senses/<code>.json`
 - [ ] Output of all three Step 5 commands pasted
-- [ ] Audit summary: model used, findings applied/rejected
+- [ ] Audit summary: model used, findings applied/rejected (wordlist, and senses if you wrote them)
 - [ ] Live smoke test output pasted
 - [ ] Listed: shared words (rule 4), periphrastic forms (rule 6), count of <3-char recall-dead entries (rule 8)
 
@@ -210,9 +219,14 @@ Some learners want one regional standard specifically: Brazilian Portuguese says
 - **Grammar**: optional `data/grammar/pt-BR.json`, an overlay on the base's grammar. An item with a base `id` replaces that item, a new `id` is added. Give a regional item `baseExample` (the base's way of saying it), and it is taught first with a contrast: *ustedes trabajan (Spain: vosotros trabajáis)*. See `data/grammar/es-419.json`.
 - **Word-building rules**: a variant uses its base's `data/patterns/` file; add `data/patterns/<code>.json` only for rules that differ.
 - **Rude words**: if a base word is rude in the variant's region, add it to the base's `data/falseFriends/<base>.json` with `"vulgarIn": ["<code>"]`. The contrast then warns about it (*Spain: coger (vulgar in much of Latin America)*), and the tests fail if the variant ever teaches it.
+- **Other meanings**: the variant inherits every sense of the base for the words it spells the same. Read the base's weave senses with the region in mind and override any that don't hold there in `data/senses/pt-BR.json` (Step 4f).
 - **Validate**: `lazy-polyglot validate pt-BR --full` (repo: `bun tests/validate-wordlist.ts pt-BR --full`). Duplicates and coverage are checked on the merged result, so a variant word that clashes with another base word is caught.
 - **Audit**: run Step 6 on the variant entries plus the base entries you considered and kept. The question for the auditor is "is this what a speaker of that region says every day?"
 - **Progress** is shared with the base for every word spelled the same, and for shared grammar and rules. Switching from `pt` to `pt-BR` keeps all of it; only the variant's own words and constructions start fresh, and they come first.
+
+## Improving your language later
+
+Every answer your agent vouched for in a placement test (`bambino=baby!sense`) is logged in `~/.lazy-polyglot/senses-review.jsonl`: language, word, answer. Those are the meanings learners actually give. Add the real ones to your senses file, validate, and, for a bundled language, send them as a PR.
 
 ## Also possible: adding native-language glosses
 

@@ -228,13 +228,13 @@ When you pass 50, 100, 200, 300 or 400 absorbed words, or the whole core, the ag
 
 ## Words with several meanings
 
-Italian *carta* is paper, but also a map and a menu; Spanish *tiempo* is time and weather. In Spanish, Italian, Portuguese and English (all their regional versions) each word lists its everyday other meanings, in `data/senses/<lang>.json`.
+Italian *carta* is paper, but also a map and a menu; Spanish *tiempo* is time and weather. In every bundled language each word lists its everyday other meanings, in `data/senses/<lang>.json`.
 
 - Placement, `/cards` and `quiz` accept any of them and say which one you gave: `✓ carta: map is right too; main meaning paper (also: menu)`.
 - A new word comes with its main meaning only. Once that is familiar, the agent may use the word in a second meaning where the reply needs it, always translated (**carta** (here: menu)), and never in two meanings in one reply.
 - A [topic](#topics-words-for-a-trip-or-an-exam) can ask for a meaning up front: a trip topic teaches *carta* as the menu.
 - Learning two languages where one spelling means different things (Italian *carta* = paper, Spanish *carta* = letter)? The new word says so once.
-- German, French and Turkish keep one meaning per word for now.
+- A regional version leaves out a meaning that doesn't hold there: Spanish *piso* is a flat in Spain, but not in Latin America.
 
 ## Supported languages
 
@@ -255,7 +255,7 @@ The code is what you pass to switch languages, e.g. `/lazy-polyglot:lang es-419`
 
 Every bundled list went through a second-model audit (a different vendor than the one that wrote it). English verbs are listed as `to work`, `to love`: English nouns and verbs often share a spelling, and each concept needs its own word. The weave still inflects them in context (*worked*, *she loves*).
 
-Adding your language is one JSON file. Just for yourself: run `/lazy-polyglot:add-language Georgian` in Claude Code, and the file lands in `~/.lazy-polyglot/wordlists/`, where it survives plugin updates. For everyone: open a PR, see [docs/AddLanguage.md](docs/AddLanguage.md). The doc is written so an AI coding agent can do it end-to-end.
+Adding your language is one JSON file. Just for yourself: run `/lazy-polyglot:add-language Georgian` in Claude Code, and the files land in `~/.lazy-polyglot/` (the word list, and the words' other meanings for the most frequent ones), where they survive plugin updates. For everyone: open a PR, see [docs/AddLanguage.md](docs/AddLanguage.md). The doc is written so an AI coding agent can do it end-to-end.
 
 Regional variants work the same way: `pt-BR.json` lists only the words where Brazilian Portuguese differs from `pt`, and the rest comes from the base. `/lazy-polyglot:add-language Brazilian Portuguese` builds one; `/lazy-polyglot:lang pt-br` switches to it.
 

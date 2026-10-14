@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { DATA_DIR, clashesElsewhere, loadSenses, loadWordlist } from "../src/store.ts";
@@ -216,5 +217,51 @@ describe("a sense the learner's language doesn't split", () => {
     expect(buildInstruction(config, [familiar], null, null, 3)).not.toContain("also");
     expect(buildInstruction({ ...config, native: "en" }, [familiar], null, null, 3)).toContain("lingua = language (also tongue)");
     expect(checkAnswer("tongue", lingua, "it")).toBe(true);
+  });
+});
+
+describe("a language you add yourself (the add-language flow)", () => {
+  const CLI = join(import.meta.dir, "..", "src", "cli.ts");
+  const BUNDLED = join(import.meta.dir, "..", "data");
+  const dir = mkdtempSync(join(tmpdir(), "lp-own-lang-"));
+  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+  const run = (...args: string[]) => spawnSync("bun", [CLI, ...args], { env: { ...process.env, LAZY_POLYGLOT_DIR: dir }, encoding: "utf8" });
+  const own = (sub: string, name: string, content: unknown) => {
+    mkdirSync(join(dir, sub), { recursive: true });
+    writeFileSync(join(dir, sub, `${name}.json`), typeof content === "string" ? content : JSON.stringify(content));
+  };
+
+  test("its senses file is validated, loaded and graded like a bundled one", () => {
+    run("init");
+    own("wordlists", "la", readFileSync(join(BUNDLED, "wordlists", "it.json"), "utf8")); // stands in for a user's own list
+    own("senses", "la", { paper: [MAP, MENU] });
+    const ok = run("validate", "la", "--full");
+    expect(ok.status).toBe(0);
+    expect(ok.stdout).toContain(join(dir, "senses", "la.json"));
+    expect(run("lang", "la").status).toBe(0);
+    expect(run("placement", "answer", "carta=map").stdout).toContain("map is right too");
+    own("senses", "la", { paper: [MAP, MENU, { ...CARD, use: "weave" }] });
+    expect(run("validate", "la").stdout + run("validate", "la").stderr).toContain("at most 2");
+  });
+
+  test("your own senses file for a bundled language is the one validate checks", () => {
+    own("senses", "it", { paper: [{ id: "Bad", use: "often" }] });
+    const r = run("validate", "it");
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain(join(dir, "senses", "it.json"));
+    rmSync(join(dir, "senses", "it.json"));
+    expect(run("validate", "it").status).toBe(0);
+  });
+});
+
+describe("candidate meanings for any language", () => {
+  test("the Wiktionary section name comes from the code, so a new language needs no edit", async () => {
+    const { wiktionaryName, pageFor } = await import("../scripts/sense-candidates.ts");
+    expect(wiktionaryName("de")).toBe("German");
+    expect(wiktionaryName("ka")).toBe("Georgian");
+    expect(wiktionaryName("nb")).toBe("Norwegian Bokmål");
+    expect(wiktionaryName("qq")).toBeNull();
+    expect(pageFor("to work", "en")).toBe("work");
+    expect(pageFor("tirare fuori", "it")).toBe("tirare fuori");
   });
 });

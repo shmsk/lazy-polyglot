@@ -3,8 +3,8 @@ import { createInterface } from "node:readline/promises";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { initConfig, loadConfig, saveConfig, loadState, saveState, loadWordlist, readJson, loadGrammar, loadPatterns, loadNumberRules, falseFriendsFor, availableLangs, userLangs, wordlistPath, wordlistLayers, normalizeLang, baseLang, langsWithState, sharedWithBase, changelogFor, loadHomographs, logSenseReview, clashesElsewhere, PLUGIN_VERSION, DATA_DIR, CONCEPTS_PATH, USER_WORDLISTS_DIR } from "./store.ts";
-import { runValidation } from "./validate.ts";
+import { initConfig, loadConfig, saveConfig, loadState, saveState, loadWordlist, readJson, loadGrammar, loadPatterns, loadNumberRules, falseFriendsFor, availableLangs, userLangs, wordlistPath, wordlistLayers, normalizeLang, baseLang, langsWithState, sharedWithBase, changelogFor, loadHomographs, logSenseReview, clashesElsewhere, sensesPath, PLUGIN_VERSION, DATA_DIR, CONCEPTS_PATH, USER_WORDLISTS_DIR } from "./store.ts";
+import { runValidation, sensesPathFor } from "./validate.ts";
 import { langName } from "./instruction.ts";
 import { invocationKey, isDuplicateInvocation } from "./guard.ts";
 import { pickGrammar, markGrammarShown, grammarProgress, type GrammarItem } from "./grammar.ts";
@@ -873,7 +873,9 @@ try {
         }
         layers = wordlistLayers(code);
       }
-      if (!runValidation(CONCEPTS_PATH, [layers], args.includes("--full"))) process.exit(1);
+      // check the senses file the plugin would load: yours in ~/.lazy-polyglot/senses before the bundled one
+      const sensesFor = (path: string) => sensesPath(basename(path, ".json")) ?? sensesPathFor(path);
+      if (!runValidation(CONCEPTS_PATH, [layers], args.includes("--full"), sensesFor)) process.exit(1);
       break;
     }
     case "pause":

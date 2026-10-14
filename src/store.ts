@@ -310,9 +310,12 @@ export function loadIrregular(lang: string): Record<string, string[]> {
   return { ...(base ? irregularFile(base) : {}), ...irregularFile(lang) };
 }
 
+/** The senses file the loader uses for exactly this code (yours in ~/.lazy-polyglot/senses first), or null. */
+export const sensesPath = (lang: string): string | null => resolveData(USER_SENSES_DIR, SENSES_DIR, lang);
+
 /** Other meanings (concept id → senses) for exactly this code; {} when there is no file. */
 function sensesFile(lang: string): SenseFile {
-  const path = resolveData(USER_SENSES_DIR, SENSES_DIR, lang);
+  const path = sensesPath(lang);
   return path ? readJson<SenseFile>(path, `senses ${lang}`) : {};
 }
 

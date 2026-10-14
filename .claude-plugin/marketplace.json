@@ -13,7 +13,7 @@
       "name": "lazy-polyglot",
       "source": "./",
       "description": "Learn a language while you work. Claude weaves a few words from the language you're learning into its replies, and /cards reviews them as flashcards.",
-      "version": "0.9.15",
+      "version": "0.9.16",
       "category": "productivity",
       "tags": [
         "language-learning",

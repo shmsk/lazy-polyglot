@@ -1,6 +1,6 @@
 {
   "name": "lazy-polyglot",
-  "version": "0.9.15",
+  "version": "0.9.16",
   "description": "Get (almost) accidentally fluent. Learn a language from the AI replies you already read every day",
   "type": "module",
   "bin": {
