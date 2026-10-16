@@ -14,23 +14,64 @@ const norm = (s: string) => s.toLowerCase().normalize("NFC");
 // a letter outside the Latin script (Cyrillic and the like): the sentence isn't English
 const NON_LATIN = /[^\P{L}\p{Script=Latin}]/u;
 
+// a sentence keeps its end mark: the question mark is half of what makes a lookup
+const SENTENCES = /[^.!?;\n]+[.!?;]*/g;
+// quoted or pasted text ("what's ultimo?", «…», `…`, a `> ` line) is a mention, never the user's own question
+const QUOTED = /"[^"\n]*"|“[^”\n]*”|«[^»\n]*»|`[^`\n]*`|^>.*$/gm;
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** The sentence asks what `t` means: «что значит casa?», "what's casa?", "casa nima degani", a bare "casa?". */
+function asksMeaning(sentence: string, t: string): boolean {
+  const x = `(?<!\\p{L})${escape(t)}(?!\\p{L})`;
+  return [
+    `what(?:'s|’s|\\s+is|\\s+does)\\s+${x}`,
+    `${x}\\s+means?\\s*\\?`,
+    `(?:meaning\\s+of|translate|define)\\s+${x}`,
+    `что\\s+(?:значит|означает|такое)\\s+${x}`,
+    `(?:как\\s+переводится|переведи|перевод)\\s+${x}`,
+    `${x}\\s*(?:[—–-]\\s*)?это\\s+что`,
+    `${x}\\s+(?:что\\s+)?(?:значит|означает)\\s*\\?`,
+    `${x}\\s+(?:nima|nimani\\s+anglatadi|ma'nosi)`,
+    `^\\s*${x}\\s*\\?+\\s*$`,
+  ].some((p) => new RegExp(p, "u").test(sentence));
+}
+
 /**
- * Find wordlist words the user actively used in their prompt; returns concept ids
- * (the state keys). Word-boundary matching via tokenization; deduped (N mentions =
+ * Words the user used in their prompt (recalls) and words they asked the meaning of
+ * (lookups), as concept ids. Word-boundary matching via tokenization; deduped (N mentions =
  * 1 recall); multi-token targets are skipped — the scan is a cheap signal, not a parser.
  * A homograph (a lemma that is also an English word: via, fine) counts only in a sentence
  * with a non-Latin letter or another, non-homograph list word: "via email" is English.
+ * A lookup is never also a recall: asking what casa means is the opposite of knowing it.
  */
-export function scanRecalls(prompt: string, words: Word[], homographs: ReadonlySet<string> = new Set()): string[] {
+export function scanPrompt(prompt: string, words: Word[], homographs: ReadonlySet<string> = new Set()): { recalls: string[]; lookups: string[] } {
   const usable = words.filter((w) => w.target.length >= MIN_RECALL_LENGTH && !w.target.includes(" "));
   const listed = new Set(usable.map((w) => norm(w.target)));
-  const found = new Set<string>();
-  for (const sentence of norm(prompt).split(/[.!?;\n]+/)) {
-    const hits = sentence.split(/[^\p{L}]+/u).filter((t) => listed.has(t));
-    const anchored = NON_LATIN.test(sentence) || hits.some((t) => !homographs.has(t));
-    for (const t of hits) if (anchored || !homographs.has(t)) found.add(t);
-  }
-  return usable.filter((w) => found.has(norm(w.target))).map((w) => w.id);
+  const scan = (text: string, keep: (sentence: string, t: string) => boolean) => {
+    const found = new Set<string>();
+    for (const sentence of text.match(SENTENCES) ?? []) {
+      const hits = sentence.split(/[^\p{L}]+/u).filter((t) => listed.has(t));
+      const anchored = NON_LATIN.test(sentence) || hits.some((t) => !homographs.has(t));
+      for (const t of hits) if ((anchored || !homographs.has(t)) && keep(sentence, t)) found.add(t);
+    }
+    return found;
+  };
+  const text = norm(prompt);
+  const asked = scan(text.replace(QUOTED, " "), asksMeaning);
+  const used = scan(text, () => true);
+  const ids = (set: Set<string>) => usable.filter((w) => set.has(norm(w.target))).map((w) => w.id);
+  return { recalls: ids(new Set([...used].filter((t) => !asked.has(t)))), lookups: ids(asked) };
+}
+
+/** Words the user actively used in their prompt (see scanPrompt). */
+export function scanRecalls(prompt: string, words: Word[], homographs: ReadonlySet<string> = new Set()): string[] {
+  return scanPrompt(prompt, words, homographs).recalls;
+}
+
+/** The user asked what these words mean: a word already met goes back like a missed quiz answer; one never met is left alone. */
+export function recordLookups(state: State, ids: string[]): State {
+  for (const id of ids) if (state[id]) applyQuizResult(state, id, false);
+  return state;
 }
 
 /** Record recall events by concept id. lastSeen is NOT touched — it tracks instruction exposure only. */

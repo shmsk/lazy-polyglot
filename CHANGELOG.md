@@ -6,6 +6,14 @@ What changed in each version, written for people who use Lazy Polyglot. The form
 after an update. If an update ever needs you to do something, its section starts with
 **Upgrade notes**: numbered steps.
 
+## [Unreleased]
+
+### Changed
+- Asking what a word means (*что значит casa?*, *what's casa?*, *casa nima degani?*, a bare
+  *casa?*) no longer counts as knowing it. The word goes back to the start with its translation,
+  like a wrong quiz answer, even if it was absorbed. A question you quote or paste in quotation
+  marks is ignored.
+
 ## [0.9.16] - 2026-10-14
 
 ### Added

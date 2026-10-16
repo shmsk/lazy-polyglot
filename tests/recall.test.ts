@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { scanRecalls, recordRecalls, applyQuizResult, checkAnswer, MIN_RECALL_LENGTH } from "../src/recall.ts";
+import { scanRecalls, scanPrompt, recordRecalls, recordLookups, applyQuizResult, checkAnswer, MIN_RECALL_LENGTH } from "../src/recall.ts";
 import { isAbsorbed, QUIZ_FAIL_EXPOSURES, type Word, type State } from "../src/types.ts";
 import { loadHomographs } from "../src/store.ts";
 
@@ -54,6 +54,68 @@ describe("scanRecalls", () => {
     const elapsed = performance.now() - t0;
     expect(found.sort()).toEqual([`id-palabra${letters(13)}`, `id-palabra${letters(200)}`]);
     expect(elapsed).toBeLessThan(100);
+  });
+});
+
+describe("scanPrompt: a lookup is not a recall", () => {
+  const it = [mk("casa"), mk("ultimo"), mk("fine"), mk("lavoro")];
+  const homographs = new Set(["fine"]);
+  const scan = (p: string) => scanPrompt(p, it, homographs);
+
+  test("asking what a word means is a lookup, in every way people ask", () => {
+    for (const p of [
+      "что значит casa?",
+      "Что означает casa",
+      "а что такое casa?",
+      "casa — это что?",
+      "casa это что",
+      "как переводится casa?",
+      "What does casa mean?",
+      "what's casa?",
+      "What is casa",
+      "meaning of casa?",
+      "casa means?",
+      "casa nima degani?",
+      "casa?",
+      "Ok. Casa?",
+    ]) expect(scan(p), p).toEqual({ recalls: [], lookups: ["id-casa"] });
+  });
+
+  test("only the asked word is a lookup; the others in the prompt stay recalls", () => {
+    expect(scan("Il lavoro va bene. Что значит ultimo?")).toEqual({ recalls: ["id-lavoro"], lookups: ["id-ultimo"] });
+  });
+
+  test("a word that is only used stays a recall", () => {
+    for (const p of ["mi casa es grande", "casa means home to me", "what about casa and lavoro", "Что с casa делать?"])
+      expect(scan(p).lookups, p).toEqual([]);
+    expect(scan("casa means home to me").recalls).toEqual(["id-casa"]);
+  });
+
+  test("a quoted or pasted question is a mention, not the user's own", () => {
+    for (const p of ['If you ask "what\'s ultimo?", the word steps back', "ты писал «что значит ultimo?» — ок", "> what's ultimo?\nхорошо"])
+      expect(scan(p).lookups, p).toEqual([]);
+  });
+
+  test("a homograph in an English sentence is neither", () => {
+    expect(scan("what does fine mean?")).toEqual({ recalls: [], lookups: [] });
+    expect(scan("что значит fine?")).toEqual({ recalls: [], lookups: ["id-fine"] }); // Cyrillic anchors it
+  });
+});
+
+describe("recordLookups", () => {
+  test("a known word goes back to the start, like a missed quiz answer", () => {
+    const state: State = { casa: { exposures: 20, lastSeen: "2026-10-01T00:00:00Z", recalls: 3, step: 5, due: "2026-11-01T00:00:00Z" } };
+    recordLookups(state, ["casa"]);
+    expect(state["casa"]?.step).toBe(0);
+    expect(state["casa"]?.recalls).toBe(0);
+    expect(state["casa"]?.exposures).toBeLessThanOrEqual(QUIZ_FAIL_EXPOSURES);
+    expect(isAbsorbed(state["casa"])).toBe(false);
+  });
+
+  test("a word never met is left alone", () => {
+    const state: State = {};
+    recordLookups(state, ["tiempo"]);
+    expect(state).toEqual({});
   });
 });
 

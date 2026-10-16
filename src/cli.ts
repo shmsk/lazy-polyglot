@@ -16,7 +16,7 @@ import { putServed, staleServed, takeServed, settleServed, lastReply, readTail, 
 import { buildInstruction } from "./instruction.ts";
 import { readingOf, readingFor, askReadingLine, readingExamples, READING_MODES, type ReadingMode } from "./reading.ts";
 import { promptGlossLang, askNativeLine, GLOSS_LANGS } from "./glossLang.ts";
-import { scanRecalls, recordRecalls, applyQuizResult, checkAnswer } from "./recall.ts";
+import { scanPrompt, recordRecalls, recordLookups, applyQuizResult, checkAnswer } from "./recall.ts";
 import { placementQueue, answerPlacement, withAlso, skippedFor, withSkipped, placementStarted, detectTooEasy, OFFER_TOO_EASY, OFFER_KNOWN_MAX, offerAtStart } from "./placement.ts";
 import { acceptCard, answerCard, cardQueue, cardStatus, revealCard } from "./cards.ts";
 import type { CardUndo } from "./cards.ts";
@@ -505,14 +505,15 @@ try {
         process.exit(0);
       }
       try {
-        // recall scan: the user's own prompt is the strongest signal a word is known
+        // recall scan: the user's own prompt is the strongest signal a word is known,
+        // and asking what a word means is the strongest that it is not
         if (payload.prompt) {
           const config = loadConfig();
           if (config.enabled !== false) {
             const state = loadState(config.lang);
-            const found = scanRecalls(payload.prompt, loadLearningWords(config.lang, state), loadHomographs(config.lang));
+            const { recalls, lookups } = scanPrompt(payload.prompt, loadLearningWords(config.lang, state), loadHomographs(config.lang));
             if (algorithmOf(config) === 3) migrate(state); // recalls climb the ladder only once it is there
-            if (found.length) saveState(config.lang, recordRecalls(state, found));
+            if (recalls.length || lookups.length) saveState(config.lang, recordLookups(recordRecalls(state, recalls), lookups));
           }
         }
       } catch {
