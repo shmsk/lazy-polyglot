@@ -164,13 +164,14 @@ describe("loading senses (user files, variants)", () => {
     writeFileSync(join(DATA_DIR, sub, `${name}.json`), JSON.stringify(content));
   };
   afterAll(() => {
-    for (const sub of ["wordlists", "senses"]) for (const n of ["xs", "xs-yy"]) rmSync(join(DATA_DIR, sub, `${n}.json`), { force: true });
+    for (const sub of ["wordlists", "senses"]) for (const n of ["xs", "xs-YY"]) rmSync(join(DATA_DIR, sub, `${n}.json`), { force: true });
   });
 
   test("a variant keeps the base senses for words it spells the same and drops them where it respells", () => {
     const ids = [...concepts.keys()];
     user("wordlists", "xs", Object.fromEntries(ids.map((id, i) => [id, `w${i}`])));
-    user("wordlists", "xs-yy", { car: "auto2" });
+    // files carry the normalized code (xs-YY): Linux matches names case-sensitively, macOS doesn't
+    user("wordlists", "xs-YY", { car: "auto2" });
     user("senses", "xs", { paper: [MAP], car: [MENU], hour: [{ id: "now", use: "accept", concept: "now" }] });
     const base = loadSenses("xs");
     expect(base.paper).toEqual([MAP]);
@@ -179,11 +180,11 @@ describe("loading senses (user files, variants)", () => {
     const variant = loadSenses("xs-yy");
     expect(variant.paper).toEqual([MAP]);
     expect(variant.car).toBeUndefined();
-    user("senses", "xs-yy", { car: [CARD] });
+    user("senses", "xs-YY", { car: [CARD] });
     expect(loadSenses("xs-yy").car).toEqual([CARD]);
     expect(loadWordlist("xs-yy").find((w) => w.id === "car")!.senses).toEqual([CARD]);
     // a meaning that doesn't hold in the region (es piso = apartment, not in Latin America): [] drops the base's
-    user("senses", "xs-yy", { car: [CARD], paper: [] });
+    user("senses", "xs-YY", { car: [CARD], paper: [] });
     expect(loadWordlist("xs-yy").find((w) => w.id === "paper")!.senses).toBeUndefined();
     expect(loadWordlist("xs").find((w) => w.id === "paper")!.senses).toEqual([MAP]);
   });
