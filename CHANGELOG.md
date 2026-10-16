@@ -6,7 +6,7 @@ What changed in each version, written for people who use Lazy Polyglot. The form
 after an update. If an update ever needs you to do something, its section starts with
 **Upgrade notes**: numbered steps.
 
-## [Unreleased]
+## [0.9.17] - 2026-10-17
 
 ### Upgrade notes
 Only for a manual hook install (`install claude`, `install codex` or `install gemini` from a
@@ -28,6 +28,8 @@ clone). The plugin installs need nothing.
 - Hermes Agent and OpenClaw run on Node 23.0–23.5, which still needs the type-stripping flag.
 - Hermes Agent: two sessions without a session id (a TUI and a cron run, say) no longer share
   one slot and settle each other's words.
+- The `/cards` mod's code is laid out the way the Claude Code plugin directory reads it, so the
+  plugin can be listed there. Nothing changes in how cards work.
 
 ### Changed
 - Asking what a word means (*что значит casa?*, *what's casa?*, *casa nima degani?*, a bare

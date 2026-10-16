@@ -4,6 +4,7 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { Card, CardResult, CardStatus, CardsView, HintLine } from '../types'
 import { cardLangs, langTag } from './lang'
 import { cardSvg, doneSvg } from './svg'
+import { ask, hintText } from './text'
 
 // The mod draws; the Lazy Polyglot CLI picks, grades and records every card
 // (`lazy-polyglot cards ...`, JSON out), so progress lives in one place: ~/.lazy-polyglot.
@@ -64,18 +65,14 @@ async function showStatus($: Engine, status: CardStatus) {
   await update($, hint, (prev): HintLine | null => (show ? { words: status.words ?? [], known: status.known, total: status.total, index: prev?.index ?? 0 } : null))
 }
 
-/** `cucina = кухня  ·  5 of 451 learned`: the word at `index`, round and round. */
-export function hintText(h: HintLine): string {
-  const w = h.words.length > 0 ? h.words[h.index % h.words.length]! : undefined
-  const word = w && `${w.target}${w.reading ? ` [${w.reading}]` : ''} = ${w.gloss}`
-  return [word, `${h.known} of ${h.total} learned`].filter(Boolean).join('  ·  ')
+async function refresh($: Engine) {
+  try {
+    const status = (await cards($, ['status'])) as CardStatus
+    await showStatus($, status)
+  } catch {
+    // Lazy Polyglot missing or broken: /cards says why when opened
+  }
 }
-
-const refresh = ($: Engine) =>
-  void cards($, ['status']).then(
-    status => showStatus($, status as CardStatus),
-    () => undefined, // Lazy Polyglot missing or broken: /cards says why when opened
-  )
 
 async function start($: Engine) {
   await update($, view, (): CardsView => ({ phase: 'loading' }))
@@ -170,13 +167,10 @@ async function advance($: Engine) {
   })
 }
 
-const ask = (card: Card, lang: string) =>
-  card.kind === 'placement' ? 'Do you know this one? Translate it.' : card.dir === 'reverse' ? `In ${lang}?` : 'Translate:'
-
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'cards', description: 'Review Lazy Polyglot words as flashcards (due words first, then placement)' })
-    refresh($)
+    void refresh($)
     return next(e)
   })
 
@@ -187,7 +181,7 @@ export const register: Register = on => {
   })
 
   on('turn.complete', async ($, e, next) => {
-    refresh($)
+    void refresh($)
     return next(e)
   })
 

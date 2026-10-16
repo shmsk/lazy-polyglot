@@ -2,7 +2,7 @@
   "name": "lazy-polyglot",
   "displayName": "Lazy Polyglot",
   "description": "Learn a language while you work. Claude weaves a few words from the language you're learning into its replies, and /cards reviews them as flashcards.",
-  "version": "0.9.16",
+  "version": "0.9.17",
   "author": {
     "name": "Kirill Shumskii",
     "url": "https://github.com/shmsk"

@@ -3,7 +3,7 @@ import type { Engine } from 'claude-code/testing'
 import type { On, RenderSurface } from 'claude-code'
 import { cardSvg, esc, fitSize } from '../hooks/svg'
 import { langTag } from '../hooks/lang'
-import { hintText } from '../hooks/register'
+import { hintText } from '../hooks/text'
 
 // A stand-in for `lazy-polyglot cards ...`: two cards, a forward review and a reverse one.
 const BASE = { lang: 'it', paused: false, due: 2, known: 10, learning: 3, placementLeft: 40, total: 432, words: [{ target: 'casa', gloss: 'дом' }, { target: 'tempo', gloss: 'время', reading: 'темпо' }] }
