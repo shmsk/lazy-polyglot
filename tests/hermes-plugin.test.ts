@@ -29,6 +29,9 @@ out = {"hooks": sorted(ctx.hooks), "commands": sorted(ctx.commands)}
 out["pre_llm_call"] = ctx.hooks["pre_llm_call"](session_id="s1", user_message="hola", conversation_history=[], is_first_turn=True, model="m", platform="cli")
 out["post_llm_call"] = ctx.hooks["post_llm_call"](session_id="s1", user_message="hola", assistant_response="Una **casa** (house).", conversation_history=[], model="m", platform="cli")
 out["post_empty"] = ctx.hooks["post_llm_call"](session_id="s1", assistant_response="")
+out["pre_noid"] = ctx.hooks["pre_llm_call"](user_message="ciao")
+ctx.hooks["post_llm_call"](session_id=None, assistant_response="ok")
+out["pid"] = __import__("os").getpid()
 out["cmd"] = ctx.commands["lazy-polyglot"](sys.argv[2])
 print(json.dumps(out))
 `;
@@ -53,7 +56,7 @@ function setup(name: string, cliBody: string): string {
 function run(plugin: string, cmdArgs: string) {
   const r = spawnSync("python3", [join(scratch, "harness.py"), plugin, cmdArgs], { encoding: "utf8", timeout: 40000, env: { ...process.env, LC_STOP_LOG: join(scratch, "stop.jsonl") } });
   if (r.status !== 0) throw new Error(r.stderr);
-  return JSON.parse(r.stdout) as { hooks: string[]; commands: string[]; pre_llm_call: unknown; post_llm_call: unknown; post_empty: unknown; cmd: string };
+  return JSON.parse(r.stdout) as { hooks: string[]; commands: string[]; pre_llm_call: unknown; post_llm_call: unknown; post_empty: unknown; pre_noid: unknown; pid: number; cmd: string };
 }
 
 const ECHO_CLI = `
@@ -74,6 +77,38 @@ if (args[0] === "hook") {
 `;
 
 describe.skipIf(!hasPython)("hermes plugin (python3 + fake CLI)", () => {
+  test("Node fallback selects the type stripping flag for supported versions", () => {
+    const plugin = setup("runtime", "");
+    const harness = `
+import importlib.util, json, sys
+from types import SimpleNamespace
+from unittest.mock import patch
+spec = importlib.util.spec_from_file_location("lc", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+results = []
+for version in ["22.5.0", "22.6.0", "23.0.0", "23.5.0", "23.6.0", "24.0.0"]:
+    calls = []
+    def run(args, **kwargs):
+        if args[0] == "bun": raise FileNotFoundError()
+        if args == ["node", "-v"]: return SimpleNamespace(stdout="v" + version)
+        calls.append(args)
+        return SimpleNamespace(stdout="ok", returncode=0)
+    with patch.object(mod.subprocess, "run", run):
+        mod._run(["hook"], "{}")
+    results.append(calls)
+print(json.dumps(results))
+`;
+    const r = spawnSync("python3", ["-c", harness, plugin], { encoding: "utf8" });
+    expect(r.status).toBe(0);
+    const results = JSON.parse(r.stdout) as string[][][];
+    expect(results[0]).toEqual([]);
+    for (const index of [1, 2, 3, 4, 5]) {
+      expect(results[index]).toHaveLength(1);
+      expect(results[index]![0]!.includes("--experimental-strip-types")).toBe(index <= 3);
+      expect(results[index]![0]!.at(-1)).toBe("hook");
+    }
+  });
+
   test("registers pre_llm_call, post_llm_call and /lazy-polyglot", () => {
     const out = run(setup("reg", ECHO_CLI), "status");
     expect(out.hooks).toEqual(["post_llm_call", "pre_llm_call"]);
@@ -92,7 +127,18 @@ describe.skipIf(!hasPython)("hermes plugin (python3 + fake CLI)", () => {
     expect(out.post_llm_call).toBeNull();
     expect(out.post_empty).toBeNull();
     const sent = readFileSync(log, "utf8").trim().split("\n").map((l) => JSON.parse(l));
-    expect(sent).toEqual([{ session_id: "s1", hook_event_name: "Stop", last_assistant_message: "Una **casa** (house)." }]);
+    expect(sent[0]).toEqual({ session_id: "s1", hook_event_name: "Stop", last_assistant_message: "Una **casa** (house)." });
+    expect(sent).toHaveLength(2); // the second is the id-less turn below
+  });
+
+  test("no session id → both hooks use the same per-process id, never the shared empty slot", () => {
+    const log = join(scratch, "stop.jsonl");
+    rmSync(log, { force: true });
+    const out = run(setup("noid", ECHO_CLI), "status");
+    const id = `pid-${out.pid}`;
+    expect(out.pre_noid).toEqual({ context: `<lazy-polyglot>UserPromptSubmit|${id}|ciao</lazy-polyglot>` });
+    const sent = readFileSync(log, "utf8").trim().split("\n").map((l) => JSON.parse(l));
+    expect(sent[1].session_id).toBe(id);
   });
 
   test("empty block → None (no injection)", () => {

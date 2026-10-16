@@ -5,6 +5,9 @@ import { join } from "node:path";
 import { installCodex } from "../adapters/codex/install.ts";
 import { installClaude } from "../adapters/claude/install.ts";
 import { writeAgentsSection, AGENTS_START } from "../adapters/shared/agents-section.ts";
+import { hookCommand } from "../adapters/shared/hook-command.ts";
+
+const expectedCommand = hookCommand(join(import.meta.dir, "..", "src", "cli.ts"));
 
 let scratch: string;
 let origCwd: string;
@@ -37,7 +40,7 @@ describe("installCodex", () => {
     for (const event of ["UserPromptSubmit", "SessionStart", "Stop"]) {
       expect(hooks[event]).toHaveLength(1);
       expect(hooks[event][0].hooks[0].type).toBe("command");
-      expect(hooks[event][0].hooks[0].command).toMatch(/^bun \/.*\/src\/cli\.ts hook$/);
+      expect(hooks[event][0].hooks[0].command).toBe(expectedCommand);
     }
   });
 
@@ -71,6 +74,19 @@ describe("installCodex", () => {
     expect(file.hooks.UserPromptSubmit[0]).toEqual(foreign);
   });
 
+  test("refreshes previous commands and removes duplicates without changing foreign hooks", () => {
+    const path = join(scratch, ".codex", "hooks.json");
+    mkdirSync(join(scratch, ".codex"));
+    const old = { type: "command", command: "bun /old/lazy-polyglot/src/cli.ts hook", timeout: 9000 };
+    const foreign = { type: "command", command: "echo lazy-polyglot" };
+    writeFileSync(path, JSON.stringify({ hooks: { UserPromptSubmit: [{ matcher: "*", hooks: [old, foreign, old] }] } }));
+    expect(installCodex("project")).toContain("Hook installed");
+    expect(readHooks(path).UserPromptSubmit).toEqual([{ matcher: "*", hooks: [{ ...old, command: expectedCommand }, foreign] }]);
+    const first = readFileSync(path, "utf8");
+    expect(installCodex("project")).toContain("already installed");
+    expect(readFileSync(path, "utf8")).toBe(first);
+  });
+
   test("migrates the old self-serve AGENTS.md section away, keeping the rest", () => {
     const agents = join(scratch, "AGENTS.md");
     writeFileSync(agents, "# My project rules\n\nBe nice.\n");
@@ -95,7 +111,7 @@ describe("installClaude (shared JSON-hooks writer)", () => {
   test("project scope still writes both events to .claude/settings.json, idempotently", () => {
     expect(installClaude("project")).toContain("Hook installed (UserPromptSubmit + SessionStart + Stop)");
     const hooks = readHooks(join(scratch, ".claude", "settings.json"));
-    expect(hooks.UserPromptSubmit[0].hooks[0].command).toMatch(/src\/cli\.ts hook$/);
+    expect(hooks.UserPromptSubmit[0].hooks[0].command).toBe(expectedCommand);
     expect(hooks.SessionStart).toHaveLength(1);
     expect(installClaude("project")).toContain("already installed");
   });
@@ -122,7 +138,7 @@ describe("upgrade from the LangCouch install", () => {
     for (const event of ["UserPromptSubmit", "SessionStart", "Stop"]) {
       const commands = JSON.stringify(file.hooks[event]);
       expect(commands).not.toContain("/old/langcouch");
-      expect(commands.split("cli.ts hook").length).toBe(2);
+      expect(file.hooks[event].flatMap((g: { hooks: { command: string }[] }) => g.hooks).filter((h: { command: string }) => h.command === expectedCommand)).toHaveLength(1);
     }
     expect(file.hooks.UserPromptSubmit[0].hooks[0].command).toBe("echo mine");
     expect(file.hooks.SessionStart).toHaveLength(1);
@@ -143,7 +159,7 @@ describe("upgrade from the LangCouch install", () => {
     expect(file.other).toBe(1);
     for (const event of ["UserPromptSubmit", "SessionStart", "Stop"]) {
       expect(JSON.stringify(file.hooks[event])).not.toContain("/old/langcouch");
-      expect(JSON.stringify(file.hooks[event]).split("cli.ts hook").length).toBe(2);
+      expect(file.hooks[event].flatMap((g: { hooks: { command: string }[] }) => g.hooks).filter((h: { command: string }) => h.command === expectedCommand)).toHaveLength(1);
     }
     expect(installClaude("project")).toContain("already installed");
   });

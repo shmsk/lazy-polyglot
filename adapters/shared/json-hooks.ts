@@ -10,6 +10,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
  */
 
 const HOOK_MARKER = "lazy-polyglot";
+const CLI_HOOK = /[\\/]src[\\/]cli\.ts['"]?\s+hook\b/i;
 // the pre-rename install: a hook command naming langcouch, e.g. `bun …/src/cli.ts hook`
 const LEGACY_HOOK = /langcouch.*\bhook\b/i;
 
@@ -37,7 +38,8 @@ interface HooksFile {
 
 /**
  * Register `command` for every event in `path`, keeping everything else in the file.
- * Idempotent: an event that already has our entry is left as is.
+ * Idempotent: an event that already has the requested command is left as is.
+ * Refreshes our previous commands when the path or runtime changes.
  * Upgrades in place: hook entries left by the pre-rename "langcouch" install are
  * removed (a group that held only such an entry goes with it), so the hook never
  * fires twice. Foreign hooks are never touched.
@@ -54,8 +56,8 @@ export function addHooks(
 
   // current = what we'd write now (same command, or any command under the new name), name included
   const isCurrent = (h: HookEntry) =>
-    (h.command === command || h.command?.toLowerCase().includes(HOOK_MARKER)) && (extra.name === undefined || h.name === extra.name);
-  const isLegacy = (h: HookEntry) => !isCurrent(h) && LEGACY_HOOK.test(h.command ?? "");
+    (h.command === command || (h.command?.toLowerCase().includes(HOOK_MARKER) && CLI_HOOK.test(h.command))) && (extra.name === undefined || h.name === extra.name);
+  const isLegacy = (h: HookEntry) => !isCurrent(h) && LEGACY_HOOK.test(h.command ?? "") && CLI_HOOK.test(h.command ?? "");
 
   file.hooks ??= {};
   const changed: string[] = [];
@@ -63,22 +65,39 @@ export function addHooks(
   for (const event of events) {
     file.hooks[event] ??= [];
     let touched = false;
+    let installed = false;
 
     const groups: HookGroup[] = [];
     for (const g of file.hooks[event]) {
-      const legacy = Array.isArray(g.hooks) ? g.hooks.filter(isLegacy) : [];
-      if (legacy.length === 0) {
+      if (!Array.isArray(g.hooks)) {
         groups.push(g);
         continue;
       }
-      replaced += legacy.length;
-      touched = true;
-      const kept = g.hooks.filter((h) => !isLegacy(h));
-      if (kept.length > 0) groups.push({ ...g, hooks: kept });
+      const kept: HookEntry[] = [];
+      for (const h of g.hooks) {
+        const legacy = isLegacy(h);
+        if (!legacy && !isCurrent(h)) {
+          kept.push(h);
+          continue;
+        }
+        if (legacy) replaced++;
+        if (installed) {
+          touched = true;
+          continue;
+        }
+        installed = true;
+        if (h.command !== command || Object.entries(extra).some(([key, value]) => h[key as keyof HookEntry] !== value)) {
+          kept.push({ ...h, command, ...extra });
+          touched = true;
+        } else {
+          kept.push(h);
+        }
+      }
+      if (kept.length > 0 || g.hooks.length === 0) groups.push({ ...g, hooks: kept });
     }
     file.hooks[event] = groups;
 
-    if (!groups.some((g) => g.hooks?.some(isCurrent))) {
+    if (!installed) {
       groups.push({ hooks: [{ type: "command", command, ...extra }] });
       touched = true;
     }

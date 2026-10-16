@@ -15,12 +15,13 @@ All logic lives in the TypeScript CLI; this file only shells out to it.
   and returns its output. Works in the CLI and on gateway platforms.
 
 Sacred hook contract (matches src/cli.ts): never break the host session.
-Every failure path returns None. Runtime detection mirrors scripts/hook.sh:
-bun preferred, Node >= 23 native, Node 22.6+ with --experimental-strip-types.
+Every failure path returns None. Runtime detection prefers bun, then Node:
+Node >= 23.6 native, Node 22.6+ and early 23 with --experimental-strip-types.
 Standard library only; Python 3.8+.
 """
 
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -43,9 +44,9 @@ def _runtimes():
     if not m:
         return
     major, minor = int(m.group(1)), int(m.group(2))
-    if major >= 23:
+    if major > 23 or (major == 23 and minor >= 6):
         yield ["node", CLI_PATH]
-    elif major == 22 and minor >= 6:
+    elif major == 23 or (major == 22 and minor >= 6):
         yield ["node", "--experimental-strip-types", CLI_PATH]
 
 
@@ -67,11 +68,18 @@ def _run(args, stdin=""):
     return None
 
 
+def _session(session_id):
+    """The CLI keeps one served slot per session id and files an empty id under a
+    shared "default" slot, so two id-less sessions would settle each other's words.
+    Fall back to the process: separate TUI and cron runs stay apart."""
+    return session_id or "pid-%d" % os.getpid()
+
+
 def pre_llm_call(session_id="", user_message="", **kwargs):
     try:
         payload = json.dumps({
             "prompt": user_message or "",
-            "session_id": session_id or "",
+            "session_id": _session(session_id),
             "hook_event_name": "UserPromptSubmit",
         })
         r = _run(["hook"], payload)
@@ -86,7 +94,7 @@ def post_llm_call(session_id="", assistant_response="", **kwargs):
         if not assistant_response:
             return None
         payload = json.dumps({
-            "session_id": session_id or "",
+            "session_id": _session(session_id),
             "hook_event_name": "Stop",
             "last_assistant_message": assistant_response,
         })

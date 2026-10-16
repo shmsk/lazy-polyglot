@@ -2,6 +2,7 @@ import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { addHooks } from "../shared/json-hooks.ts";
+import { hookCommand } from "../shared/hook-command.ts";
 import { removeAgentsSection } from "../shared/agents-section.ts";
 
 function cliPath(): string {
@@ -24,7 +25,7 @@ export function installCodex(scope: "project" | "user"): string {
       ? join(process.env.CODEX_HOME || join(homedir(), ".codex"), "hooks.json")
       : join(process.cwd(), ".codex", "hooks.json");
 
-  const { changed, replaced } = addHooks(hooksPath, `bun ${cliPath()} hook`);
+  const { changed, replaced } = addHooks(hooksPath, hookCommand(cliPath()));
   const agentsPath = join(process.cwd(), "AGENTS.md");
   const migrated = removeAgentsSection(agentsPath)
     ? `\nRemoved the old self-serve lazy-polyglot section from ${agentsPath}.`

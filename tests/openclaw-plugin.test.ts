@@ -82,6 +82,60 @@ describe("openclaw plugin — before_prompt_build", () => {
 });
 
 describe("openclaw plugin — /lazy-polyglot", () => {
+  test("passes quoted paths, escapes, and literal shell syntax as individual arguments", () => {
+    const { spawn, calls } = makeFakeSpawn("ok");
+    const cases: [string, string[]][] = [
+      ['import "/My Files/backup.json" --config', ["import", "/My Files/backup.json", "--config"]],
+      ["export '~/My Files/b.json'", ["export", "~/My Files/b.json"]],
+      [String.raw`import /My\ Files/b.json`, ["import", "/My Files/b.json"]],
+      [String.raw`import "C:\My Files\backup.json"`, ["import", "C:\\My Files\\backup.json"]],
+      [`export "$(touch unexpected);$HOME"`, ["export", "$(touch unexpected);$HOME"]],
+      [`import 'a'" b".json`, ["import", "a b.json"]],
+      ['export ""', ["export", ""]],
+      [String.raw`export "a\"b.json"`, ["export", 'a"b.json']],
+      [String.raw`import C:\Users\me\backup.json`, ["import", "C:\\Users\\me\\backup.json"]],
+      [String.raw`import \\server\share\b.json`, ["import", "\\\\server\\share\\b.json"]],
+      ["export C:\\backups\\", ["export", "C:\\backups\\"]],
+    ];
+    for (const [input, expected] of cases) {
+      runCommand(input, spawn);
+      expect(calls.at(-1)!.args.slice(1)).toEqual(expected);
+    }
+  });
+
+  test("malformed arguments return an error without running the CLI", () => {
+    const { spawn, calls } = makeFakeSpawn("ok");
+    for (const input of ['import "unfinished', "export 'unfinished"]) {
+      expect(runCommand(input, spawn)).toStartWith("Lazy Polyglot: invalid arguments");
+    }
+    expect(calls).toHaveLength(0);
+  });
+
+  test("Node fallback selects the type stripping flag for supported versions", () => {
+    for (const [version, flag] of [["22.6.0", true], ["23.0.0", true], ["23.5.0", true], ["23.6.0", false], ["24.0.0", false]] as const) {
+      const calls: string[][] = [];
+      const spawn: SpawnFn = (cmd, args) => {
+        if (cmd === "bun") return { error: new Error("ENOENT"), status: null };
+        if (args[0] === "-v") return { status: 0, stdout: `v${version}` };
+        calls.push(args);
+        return { status: 0, stdout: "ok" };
+      };
+      expect(runCommand("status", spawn)).toBe("ok");
+      expect(calls).toHaveLength(1);
+      expect(calls[0]!.includes("--experimental-strip-types")).toBe(flag);
+      expect(calls[0]!.at(-1)).toBe("status");
+    }
+  });
+
+  test("Node versions older than 22.6 do not run the CLI", () => {
+    const spawn: SpawnFn = (cmd, args) => {
+      if (cmd === "bun") return { error: new Error("ENOENT"), status: null };
+      expect(args).toEqual(["-v"]);
+      return { status: 0, stdout: "v22.5.0" };
+    };
+    expect(runCommand("status", spawn)).toContain("needs bun or Node.js >= 22.6");
+  });
+
   test("routes arguments and returns CLI output", () => {
     const { command } = load(makeFakeSpawn("ok").spawn);
     expect(command({ args: "level up" }).text).toBe("ran: level up");

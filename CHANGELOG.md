@@ -8,6 +8,27 @@ after an update. If an update ever needs you to do something, its section starts
 
 ## [Unreleased]
 
+### Upgrade notes
+Only for a manual hook install (`install claude`, `install codex` or `install gemini` from a
+clone). The plugin installs need nothing.
+
+1. In the clone, run the same install command again, e.g. `bun src/cli.ts install codex --scope user`.
+   It rewrites the old hook line in place; it doesn't add a second one or touch other hooks.
+2. Codex only: open `/hooks` and approve the Lazy Polyglot hook again, because its command changed.
+3. Installing with Node instead of bun? Run the installer with Node too
+   (`node src/cli.ts install …`, adding `--experimental-strip-types` on Node 22 or 23.0–23.5):
+   the hook uses whichever runtime ran the installer.
+
+### Fixed
+- A manual hook install now works when the clone's folder has spaces or symbols like `'` or `$`
+  in its path, and on machines with only Node.js (it used to call `bun` regardless). Running
+  the installer again updates an older hook line instead of leaving it as is.
+- OpenClaw: `/lazy-polyglot import "/My Files/backup.json"` works; quoted paths and `\ ` escapes
+  are read like in a shell, and Windows paths (`C:\Users\me\backup.json`) pass through as typed.
+- Hermes Agent and OpenClaw run on Node 23.0–23.5, which still needs the type-stripping flag.
+- Hermes Agent: two sessions without a session id (a TUI and a cron run, say) no longer share
+  one slot and settle each other's words.
+
 ### Changed
 - Asking what a word means (*что значит casa?*, *what's casa?*, *casa nima degani?*, a bare
   *casa?*) no longer counts as knowing it. The word goes back to the start with its translation,

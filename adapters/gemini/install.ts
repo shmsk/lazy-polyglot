@@ -2,6 +2,7 @@ import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { addHooks } from "../shared/json-hooks.ts";
+import { hookCommand } from "../shared/hook-command.ts";
 
 function cliPath(): string {
   return join(dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "cli.ts");
@@ -26,7 +27,7 @@ export function installGemini(scope: "project" | "user"): string {
   const settingsPath =
     scope === "user" ? join(homedir(), ".gemini", "settings.json") : join(process.cwd(), ".gemini", "settings.json");
 
-  const { changed, replaced } = addHooks(settingsPath, `bun ${cliPath()} hook --host gemini`, GEMINI_EVENTS, { name: "lazy-polyglot", timeout: 10000 });
+  const { changed, replaced } = addHooks(settingsPath, hookCommand(cliPath(), ["--host", "gemini"]), GEMINI_EVENTS, { name: "lazy-polyglot", timeout: 10000 });
   if (changed.length === 0) return `lazy-polyglot hook already installed in ${settingsPath} — leaving it alone`;
   return [
     `Hook installed (${changed.join(" + ")}): ${settingsPath}`,

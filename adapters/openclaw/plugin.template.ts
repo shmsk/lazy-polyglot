@@ -23,8 +23,8 @@ import { spawnSync } from "node:child_process";
  * that, each retry would mark exposures again and corrupt the SRS counts.
  *
  * Sacred hook contract (matches src/cli.ts): never break the host session.
- * Every failure path is a silent no-op. Runtime detection mirrors
- * scripts/hook.sh: bun, Node >= 23, Node 22.6+ with --experimental-strip-types.
+ * Every failure path is a silent no-op. Runtime detection tries Bun first;
+ * Node >= 23.6 runs natively, Node 22.6+ and early 23 use --experimental-strip-types.
  *
  * Deliberately no import from the OpenClaw SDK: the plugin directory lives
  * outside the host's node_modules, and the entry is a plain object of the
@@ -61,8 +61,8 @@ function runCli(args: string[], input: string, spawn: SpawnFn): RunResult | null
   if (!m) return null;
   const major = Number(m[1]);
   const minor = Number(m[2]);
-  if (major >= 23) return attempt("node", [CLI_PATH, ...args]);
-  if (major === 22 && minor >= 6) return attempt("node", ["--experimental-strip-types", CLI_PATH, ...args]);
+  if (major > 23 || (major === 23 && minor >= 6)) return attempt("node", [CLI_PATH, ...args]);
+  if (major === 23 || (major === 22 && minor >= 6)) return attempt("node", ["--experimental-strip-types", CLI_PATH, ...args]);
   return null;
 }
 
@@ -102,8 +102,51 @@ export function lastAssistantText(messages: unknown): string {
 // Subcommands safe to run from a chat; quiz is interactive, init/install touch host config.
 const COMMANDS = ["lang", "level", "mode", "pause", "resume", "status", "validate", "instruction", "export", "import"];
 
+/**
+ * Split shell-style arguments without evaluating substitutions or running a shell.
+ * A backslash escapes only what would otherwise end or quote a word (whitespace and
+ * quotes; inside double quotes, only `"`), so Windows paths like C:\Users\me and
+ * \\server\share pass through unquoted.
+ */
+function commandArgs(raw: string): string[] {
+  const args: string[] = [];
+  let word = "";
+  let quote = "";
+  let started = false;
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw[i]!;
+    const next = raw[i + 1];
+    if (char === "\\" && next !== undefined && (quote === '"' ? next === '"' : !quote && /[\s'"]/.test(next))) {
+      word += next;
+      i++;
+      started = true;
+    } else if (quote) {
+      if (char === quote) quote = "";
+      else word += char;
+    } else if (char === "'" || char === '"') {
+      quote = char;
+      started = true;
+    } else if (/\s/.test(char)) {
+      if (started) args.push(word);
+      word = "";
+      started = false;
+    } else {
+      word += char;
+      started = true;
+    }
+  }
+  if (quote) throw new Error("Unclosed quote");
+  if (started) args.push(word);
+  return args;
+}
+
 export function runCommand(rawArgs: string, spawn: SpawnFn = defaultSpawn): string {
-  const args = rawArgs.trim().split(/\s+/).filter(Boolean);
+  let args: string[];
+  try {
+    args = commandArgs(rawArgs);
+  } catch {
+    return "Lazy Polyglot: invalid arguments; close every quote.";
+  }
   if (!args[0] || !COMMANDS.includes(args[0])) return `Usage: /lazy-polyglot <${COMMANDS.join("|")}> [args]`;
   const r = runCli(args, "", spawn);
   if (!r) return "Lazy Polyglot: the CLI did not run. It needs bun or Node.js >= 22.6.";
